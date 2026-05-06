@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>natalyx — Репетитор</title>
-    <script src="https://telegram.org/js/telegram-web-app.js">
-    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-primary: #0b0b20;
@@ -234,7 +233,6 @@
             color: var(--blue-info);
         }
 
-        /* ── month calendar ── */
         .calendar-section {
             display: flex;
             flex-direction: column;
@@ -361,6 +359,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 4px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .lessons-title {
             font-size: 0.8rem;
@@ -378,6 +378,23 @@
             border-radius: 20px;
             border: 1px solid var(--border-card);
         }
+        .btn-clear-all {
+            background: transparent;
+            border: 1px solid var(--border-card);
+            color: var(--text-muted);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-clear-all:active {
+            background: rgba(245, 158, 75, 0.15);
+            color: var(--orange);
+        }
+
         .lessons-list {
             display: flex;
             flex-direction: column;
@@ -501,6 +518,28 @@
         }
         .payment-checkbox input:checked+.checkmark::after {
             opacity: 1;
+        }
+
+        .lesson-delete {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f59e4b;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+            -webkit-tap-highlight-color: transparent;
+            margin-left: 4px;
+        }
+        .lesson-delete:active {
+            background: rgba(245, 158, 75, 0.2);
+            transform: scale(0.9);
         }
 
         .empty-state {
@@ -744,6 +783,7 @@
         <div class="lessons-header">
             <span class="lessons-title">Список занять</span>
             <span class="lessons-count-badge" id="lessonsCountBadge">0 занять</span>
+            <button id="btnClearAll" class="btn-clear-all" aria-label="Очистити всі заняття">🗑️ Очистити все</button>
         </div>
         <div class="lessons-list" id="lessonsList"></div>
     </div>
@@ -798,51 +838,58 @@
                 }
             }
 
-            function hapticLight() { if (hapticAvailable) try { tg.HapticFeedback.impactOccurred('light'); } catch (
-                e) {} }
-
-            function hapticSuccess() { if (hapticAvailable) try { tg.HapticFeedback.notificationOccurred('success'); } catch (
-                e) {} }
-
-            function hapticWarning() { if (hapticAvailable) try { tg.HapticFeedback.notificationOccurred('warning'); } catch (
-                e) {} }
+            function hapticLight() { if (hapticAvailable) try { tg.HapticFeedback.impactOccurred('light'); } catch (e) {} }
+            function hapticSuccess() { if (hapticAvailable) try { tg.HapticFeedback.notificationOccurred('success'); } catch (e) {} }
+            function hapticWarning() { if (hapticAvailable) try { tg.HapticFeedback.notificationOccurred('warning'); } catch (e) {} }
 
             const today = new Date();
             const dayMs = 86400000;
 
-            function fmtDate(d) { const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day =
-                    String(d.getDate()).padStart(2, '0'); return `${y}-${m}-${day}`; }
+            function fmtDate(d) {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            }
 
-            function parseDate(str) { const [y, m, d] = str.split('-').map(Number); return new Date(y, m - 1, d); }
+            function parseDate(str) {
+                const [y, m, d] = str.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            }
 
             const todayStr = fmtDate(today);
-
             function dateFromToday(offset) { const d = new Date(today.getTime() + offset * dayMs); return fmtDate(d); }
 
-            let lessons = [
-                { id: 1, date: todayStr, time: '16:00 - 17:00', student: 'Олександр Петренко', subject: 'Математика',
-                    price: 500, isPaid: true },
-                { id: 2, date: todayStr, time: '18:00 - 19:00', student: 'Марія Коваленко', subject: 'Англійська мова',
-                    price: 450, isPaid: false },
-                { id: 3, date: todayStr, time: '20:00 - 21:00', student: 'Дмитро Шевчук', subject: 'Фізика', price: 600,
-                    isPaid: true },
-                { id: 4, date: dateFromToday(1), time: '15:00 - 16:00', student: 'Анна Бондар', subject: 'Хімія',
-                price: 500, isPaid: false },
-                { id: 5, date: dateFromToday(1), time: '17:30 - 18:30', student: 'Ігор Мельник',
-                subject: 'Програмування', price: 700, isPaid: false },
-                { id: 6, date: dateFromToday(2), time: '10:00 - 11:00', student: 'Софія Лисенко',
-                    subject: 'Українська мова', price: 400, isPaid: true },
-                { id: 7, date: dateFromToday(3), time: '18:00 - 19:00', student: 'Олександр Петренко',
-                    subject: 'Математика', price: 500, isPaid: false },
-                { id: 8, date: dateFromToday(-1), time: '16:00 - 17:00', student: 'Катерина Романюк', subject: 'Біологія',
-                    price: 450, isPaid: true },
-                { id: 9, date: dateFromToday(-1), time: '19:00 - 20:00', student: 'Марія Коваленко',
-                    subject: 'Англійська мова', price: 450, isPaid: true },
-                { id: 10, date: dateFromToday(4), time: '14:00 - 15:00', student: 'Дмитро Шевчук', subject: 'Фізика',
-                    price: 600, isPaid: false },
-            ];
+            // ========== localStorage ==========
+            const STORAGE_KEY = 'natalyx_lessons';
 
-            let nextId = lessons.length + 1;
+            let lessons = [];
+            let nextId = 1;
+
+            function loadLessonsFromStorage() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            lessons = parsed;
+                            nextId = Math.max(...lessons.map(l => l.id), 0) + 1;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Не вдалося завантажити заняття:', e);
+                }
+            }
+
+            function saveLessonsToStorage() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons));
+                } catch (e) {
+                    showToast('⚠️ Помилка збереження');
+                }
+            }
+
+            // ========== інші змінні ==========
             let selectedDate = todayStr;
 
             const $headerBalance = document.getElementById('headerBalance');
@@ -865,6 +912,7 @@
             const $inputTime = document.getElementById('inputTime');
             const $inputPrice = document.getElementById('inputPrice');
             const $toast = document.getElementById('toast');
+            const $btnClearAll = document.getElementById('btnClearAll');
 
             let toastTimer;
 
@@ -880,8 +928,11 @@
             function computeSummaries() {
                 const allPaid = lessons.filter(l => l.isPaid);
                 const allUnpaid = lessons.filter(l => !l.isPaid);
-                return { income: allPaid.reduce((s, l) => s + l.price, 0), unpaid: allUnpaid.reduce((s, l) => s + l
-                        .price, 0), totalLessons: lessons.length };
+                return {
+                    income: allPaid.reduce((s, l) => s + l.price, 0),
+                    unpaid: allUnpaid.reduce((s, l) => s + l.price, 0),
+                    totalLessons: lessons.length
+                };
             }
 
             function updateSummaries() {
@@ -900,15 +951,17 @@
                 $lessonsCountBadge.textContent = `${count} ${word}`;
             }
 
-            function escapeHTML(str) { const div = document.createElement('div');
-                div.textContent = str; return div.innerHTML; }
+            function escapeHTML(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
 
             function renderLessons() {
                 const filtered = getFilteredLessons();
                 $lessonsList.innerHTML = '';
                 if (filtered.length === 0) {
-                    $lessonsList.innerHTML =
-                        `<div class="empty-state"><span class="empty-icon">📭</span><span class="empty-text">На цю дату занять немає</span></div>`;
+                    $lessonsList.innerHTML = `<div class="empty-state"><span class="empty-icon">📭</span><span class="empty-text">На цю дату занять немає</span></div>`;
                     return;
                 }
                 filtered.sort((a, b) => a.time.localeCompare(b.time));
@@ -931,7 +984,9 @@
                                 <input type="checkbox" ${lesson.isPaid ? 'checked' : ''} data-id="${lesson.id}">
                                 <span class="checkmark"></span>
                             </label>
-                        </div>`;
+                        </div>
+                        <button class="lesson-delete" data-id="${lesson.id}" aria-label="Видалити заняття">🗑️</button>`;
+
                     const checkbox = card.querySelector('input[type="checkbox"]');
                     checkbox.addEventListener('change', (e) => {
                         e.stopPropagation();
@@ -939,39 +994,52 @@
                         const obj = lessons.find(l => l.id === id);
                         if (obj) {
                             obj.isPaid = checkbox.checked;
-                            obj.isPaid ? (hapticSuccess(), showToast('✅ Оплачено!')) : (
-                                hapticWarning(), showToast('⚠️ Позначено неоплаченим'));
+                            saveLessonsToStorage();
+                            obj.isPaid ? (hapticSuccess(), showToast('✅ Оплачено!')) : (hapticWarning(), showToast('⚠️ Позначено неоплаченим'));
                             renderLessons();
                             renderCalendar();
                             updateSummaries();
                         }
                     });
+
                     card.addEventListener('click', (e) => {
-                        if (e.target.tagName === 'INPUT' || e.target.classList.contains('checkmark'))
-                            return;
+                        if (e.target.tagName === 'INPUT' || e.target.classList.contains('checkmark') || e.target.classList.contains('lesson-delete')) return;
                         hapticLight();
                         const id = parseInt(card.dataset.id);
                         const obj = lessons.find(l => l.id === id);
                         if (obj) {
                             obj.isPaid = !obj.isPaid;
-                            obj.isPaid ? (hapticSuccess(), showToast('✅ Оплачено!')) : (
-                                hapticWarning(), showToast('⚠️ Позначено неоплаченим'));
+                            saveLessonsToStorage();
+                            obj.isPaid ? (hapticSuccess(), showToast('✅ Оплачено!')) : (hapticWarning(), showToast('⚠️ Позначено неоплаченим'));
                             renderLessons();
                             renderCalendar();
                             updateSummaries();
                         }
                     });
+
+                    const deleteBtn = card.querySelector('.lesson-delete');
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const id = parseInt(deleteBtn.dataset.id);
+                        lessons = lessons.filter(l => l.id !== id);
+                        saveLessonsToStorage();
+                        hapticWarning();
+                        showToast('🗑️ Заняття видалено');
+                        renderLessons();
+                        renderCalendar();
+                        updateSummaries();
+                    });
+
                     $lessonsList.appendChild(card);
                 });
             }
 
             // ── month calendar state ──
             let calendarYear = today.getFullYear();
-            let calendarMonth = today.getMonth(); // 0-11
+            let calendarMonth = today.getMonth();
 
             const monthNames = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
-                'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
-            ];
+                'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
 
             function getDaysWithLessons() {
                 const set = new Set();
@@ -1020,15 +1088,13 @@
 
             function goToPrevMonth() {
                 hapticLight();
-                if (calendarMonth === 0) { calendarMonth = 11;
-                    calendarYear--; } else calendarMonth--;
+                if (calendarMonth === 0) { calendarMonth = 11; calendarYear--; } else calendarMonth--;
                 renderCalendar();
             }
 
             function goToNextMonth() {
                 hapticLight();
-                if (calendarMonth === 11) { calendarMonth = 0;
-                    calendarYear++; } else calendarMonth++;
+                if (calendarMonth === 11) { calendarMonth = 0; calendarYear++; } else calendarMonth++;
                 renderCalendar();
             }
 
@@ -1074,24 +1140,16 @@
                 const subject = $inputSubject.value.trim();
                 const time = $inputTime.value.trim();
                 const priceStr = $inputPrice.value.trim();
-                if (!dateVal) { showToast('⚠️ Вкажіть дату');
-                    hapticWarning();
-                    $inputDate.focus(); return; }
-                if (!student) { showToast('⚠️ Вкажіть ім\'я учня');
-                    hapticWarning();
-                    $inputStudent.focus(); return; }
-                if (!subject) { showToast('⚠️ Вкажіть предмет');
-                    hapticWarning();
-                    $inputSubject.focus(); return; }
-                if (!time || !time.includes('-')) { showToast('⚠️ Вкажіть час (напр. 18:00 - 19:00)');
-                    hapticWarning();
-                    $inputTime.focus(); return; }
+                if (!dateVal) { showToast('⚠️ Вкажіть дату'); hapticWarning(); $inputDate.focus(); return; }
+                if (!student) { showToast('⚠️ Вкажіть ім\'я учня'); hapticWarning(); $inputStudent.focus(); return; }
+                if (!subject) { showToast('⚠️ Вкажіть предмет'); hapticWarning(); $inputSubject.focus(); return; }
+                if (!time || !time.includes('-')) { showToast('⚠️ Вкажіть час (напр. 18:00 - 19:00)'); hapticWarning(); $inputTime.focus(); return; }
                 const price = parseInt(priceStr);
-                if (isNaN(price) || price <= 0) { showToast('⚠️ Вкажіть коректну вартість');
-                    hapticWarning();
-                    $inputPrice.focus(); return; }
+                if (isNaN(price) || price <= 0) { showToast('⚠️ Вкажіть коректну вартість'); hapticWarning(); $inputPrice.focus(); return; }
+
                 const newLesson = { id: nextId++, date: dateVal, time, student, subject, price, isPaid: false };
                 lessons.unshift(newLesson);
+                saveLessonsToStorage();
                 hapticSuccess();
                 showToast('✅ Заняття додано!');
                 closeModal();
@@ -1108,12 +1166,26 @@
             $btnCancel.addEventListener('click', closeModal);
             $btnSave.addEventListener('click', saveNewLesson);
             $modalOverlay.addEventListener('click', (e) => { if (e.target === $modalOverlay) closeModal(); });
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $modalOverlay.classList.contains(
-                    'active')) closeModal(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $modalOverlay.classList.contains('active')) closeModal(); });
             $inputPrice.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveNewLesson(); });
+
+            // Кнопка "Очистити все"
+            $btnClearAll.addEventListener('click', () => {
+                if (confirm('Ви впевнені, що хочете видалити ВСІ заняття?')) {
+                    lessons = [];
+                    nextId = 1;
+                    localStorage.removeItem(STORAGE_KEY);
+                    hapticWarning();
+                    showToast('🗑️ Усі заняття видалено');
+                    renderCalendar();
+                    renderLessons();
+                    updateSummaries();
+                }
+            });
 
             function init() {
                 initTelegram();
+                loadLessonsFromStorage();   // завантажуємо збережені заняття
                 renderCalendar();
                 renderLessons();
                 updateSummaries();

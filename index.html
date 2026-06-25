@@ -152,7 +152,7 @@
             padding: 8px 14px 20px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 10px;
             position: relative;
             z-index: 2;
             scrollbar-width: thin;
@@ -228,6 +228,98 @@
             width: 100%;
         }
 
+        /* ============ ПРЕВ'Ю БАНЕР ============ */
+        .video-preview {
+            background: rgba(18, 22, 30, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease both;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            width: 100%;
+        }
+
+        .video-preview:hover {
+            border-color: rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.3);
+        }
+
+        .video-preview:active {
+            transform: scale(0.97);
+            transition: all 0.1s ease;
+        }
+
+        .video-preview-thumb {
+            width: 100%;
+            height: 200px;
+            background: url('preview.jpg') center/cover no-repeat;
+            /* НАЗВІТЬ ВАШЕ ФОТО preview.jpg І ПОКЛАДІТЬ ПОРУЧ */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-preview-thumb::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .play-button-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 0, 0, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .play-button-overlay::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 20px solid white;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            margin-left: 4px;
+        }
+
+        .video-preview:hover .play-button-overlay {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.9);
+        }
+
+        .video-preview-info {
+            padding: 14px;
+        }
+
+        .video-preview-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .video-preview-channel {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
         .welcome-banner {
             background: rgba(18, 22, 30, 0.4);
             backdrop-filter: blur(20px);
@@ -260,12 +352,11 @@
             color: var(--text-secondary);
         }
 
-        /* ============ СІТКА — КНОПКИ ПОСЕРЕДИНІ ============ */
         .grid-nav {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin: 4px 0;
+            gap: 8px;
+            margin: 2px 0;
             width: 100%;
             padding: 0;
             align-items: center;
@@ -279,30 +370,29 @@
                 rgba(18, 14, 7, 0.6) 100%);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 40px;
-            padding: 14px 20px;
+            border-radius: 35px;
+            padding: 10px 16px;
             text-align: center;
             color: #d4b860;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 600;
             letter-spacing: 0.02em;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
-            max-width: 300px;
+            max-width: 240px;
             position: relative;
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             animation: fadeInUp 0.6s ease both;
             border: 1px solid rgba(201, 160, 80, 0.3);
             box-shadow: 
-                0 0 12px rgba(201, 160, 80, 0.2),
-                0 0 25px rgba(201, 160, 80, 0.08),
+                0 0 10px rgba(201, 160, 80, 0.15),
                 inset 0 1px 0 rgba(255, 255, 255, 0.06),
                 inset 0 -2px 3px rgba(0, 0, 0, 0.3),
-                0 3px 10px rgba(0, 0, 0, 0.4);
+                0 3px 8px rgba(0, 0, 0, 0.4);
             overflow: hidden;
         }
 
@@ -310,14 +400,14 @@
             content: '';
             position: absolute;
             top: 2px;
-            left: 15px;
-            right: 15px;
+            left: 12px;
+            right: 12px;
             height: 30%;
             background: linear-gradient(180deg, 
                 rgba(255, 255, 255, 0.12) 0%, 
                 rgba(255, 255, 255, 0.04) 40%,
                 rgba(255, 255, 255, 0) 100%);
-            border-radius: 40px 40px 50% 50%;
+            border-radius: 35px 35px 50% 50%;
             pointer-events: none;
             transition: all 0.3s ease;
         }
@@ -326,8 +416,8 @@
             content: '';
             position: absolute;
             bottom: 2px;
-            left: 15px;
-            right: 15px;
+            left: 12px;
+            right: 12px;
             height: 15%;
             background: linear-gradient(0deg, 
                 rgba(255, 200, 130, 0.06) 0%, 
@@ -337,7 +427,7 @@
         }
 
         .nav-card span {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             filter: drop-shadow(0 0 5px rgba(201, 160, 80, 0.3));
             transition: transform 0.3s ease;
         }
@@ -347,9 +437,7 @@
             border-color: rgba(201, 160, 80, 0.5);
             box-shadow: 
                 0 0 20px rgba(201, 160, 80, 0.4),
-                0 0 40px rgba(201, 160, 80, 0.15),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                inset 0 -2px 3px rgba(0, 0, 0, 0.3),
                 0 6px 16px rgba(0, 0, 0, 0.5);
         }
 
@@ -357,10 +445,8 @@
             transform: scale(0.95);
             border-color: rgba(201, 160, 80, 0.7);
             box-shadow: 
-                0 0 30px rgba(201, 160, 80, 0.6),
-                0 0 60px rgba(201, 160, 80, 0.25),
-                inset 0 2px 5px rgba(0, 0, 0, 0.4),
-                inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+                0 0 25px rgba(201, 160, 80, 0.6),
+                inset 0 2px 5px rgba(0, 0, 0, 0.4);
             transition: all 0.08s ease;
         }
 
@@ -392,19 +478,6 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06) 50%, transparent);
         }
 
-        .video-thumb {
-            background: linear-gradient(135deg, rgba(26, 36, 50, 0.6), rgba(16, 24, 32, 0.6));
-            height: 80px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-            font-size: 1.8rem;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            width: 100%;
-        }
-
         .btn {
             display: inline-flex;
             align-items: center;
@@ -423,21 +496,6 @@
             transition: all 0.25s ease;
         }
 
-        .btn-youtube {
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            background: linear-gradient(135deg, #ff0000, #cc0000);
-            color: white;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4), 0 0 40px rgba(255, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-youtube:active {
-            transform: scale(0.93);
-            box-shadow: 0 0 35px rgba(255, 0, 0, 0.7), 0 0 60px rgba(255, 0, 0, 0.3);
-        }
-
         .btn-glow {
             padding: 13px 28px;
             border-radius: 50px;
@@ -454,9 +512,9 @@
         }
 
         .btn-neon {
-            padding: 12px 26px;
+            padding: 10px 20px;
             border-radius: 50px;
-            font-size: 0.82rem;
+            font-size: 0.75rem;
             background: rgba(201, 160, 80, 0.08);
             color: #d4a840;
             border: 1.5px solid rgba(201, 160, 80, 0.4);
@@ -486,22 +544,6 @@
         .btn-glass-depth:active {
             background: rgba(255, 255, 255, 0.12);
             border-color: rgba(255, 255, 255, 0.2);
-            transform: scale(0.94);
-        }
-
-        .btn-pill {
-            padding: 10px 22px;
-            border-radius: 50px;
-            font-size: 0.78rem;
-            background: linear-gradient(135deg, rgba(201, 160, 80, 0.2), rgba(180, 130, 50, 0.08));
-            color: #d4a840;
-            border: 1px solid rgba(201, 160, 80, 0.25);
-        }
-
-        .btn-pill:active {
-            background: linear-gradient(135deg, rgba(201, 160, 80, 0.35), rgba(180, 130, 50, 0.15));
-            border-color: rgba(201, 160, 80, 0.5);
-            box-shadow: 0 0 20px rgba(201, 160, 80, 0.3);
             transform: scale(0.94);
         }
 
@@ -674,17 +716,9 @@
             const state = { section: 'home', bookmarks: new Set(), notifications: 3 };
 
             const data = {
-                videos: [
-                    { title: "Биткоин после халвинга", desc: "Полный разбор рыночного цикла", thumb: "🎥" },
-                    { title: "DeFi стратегии 2026", desc: "Пассивный доход в крипте", thumb: "📊" },
-                    { title: "Альткоины: топ-5", desc: "Перспективные монеты", thumb: "🔮" }
-                ],
                 news: [
                     { title: "ETF приток $2.1B", badge: "Срочно", text: "Институционалы заходят в рынок." },
                     { title: "Регуляция США", text: "Новый законопроект о стейблкоинах." }
-                ],
-                polls: [
-                    { question: "Курс BTC к декабрю?", options: ["$130k+", "$100-130k", "Ниже $100k"], votes: [58, 27, 15] }
                 ],
                 education: [
                     { title: "Блокчейн для начинающих", level: "Базовый" },
@@ -695,35 +729,22 @@
 
             function renderHome() {
                 return `
-          <div class="welcome-banner">
-            <button class="btn btn-youtube btn-full" onclick="event.stopPropagation(); window.open('${YOUTUBE_URL}', '_blank');">
-              ▶ YouTube канал
-            </button>
+          <div class="video-preview stagger-1" onclick="window.open('${YOUTUBE_URL}', '_blank');">
+            <div class="video-preview-thumb">
+              <div class="play-button-overlay"></div>
+            </div>
+            <div class="video-preview-info">
+              <div class="video-preview-title">▶ Новое видео на канале</div>
+              <div class="video-preview-channel">Дневник Активов • Нажмите чтобы смотреть</div>
+            </div>
           </div>
           <div class="grid-nav">
-            <div class="nav-card stagger-1" data-nav="videos"><span>🎬</span>Видео</div>
             <div class="nav-card stagger-1" data-nav="news"><span>📰</span>Новости</div>
-            <div class="nav-card stagger-2" data-nav="community"><span>💬</span>Посты</div>
-            <div class="nav-card stagger-2" data-nav="polls"><span>📊</span>Опросы</div>
-            <div class="nav-card stagger-3" data-nav="education"><span>📚</span>Обучение</div>
-            <div class="nav-card stagger-3" data-nav="links"><span>🔗</span>Ссылки</div>
-            <div class="nav-card stagger-4" data-nav="portfolio"><span>💼</span>Портфель</div>
-            <div class="nav-card stagger-4" data-nav="faq"><span>❓</span>FAQ</div>
+            <div class="nav-card stagger-1" data-nav="community"><span>💬</span>Посты</div>
+            <div class="nav-card stagger-2" data-nav="education"><span>📚</span>Обучение</div>
+            <div class="nav-card stagger-2" data-nav="links"><span>🔗</span>Ссылки</div>
+            <div class="nav-card stagger-3" data-nav="portfolio"><span>💼</span>Портфель</div>
           </div>
-        `;
-            }
-
-            function renderVideos() {
-                return `
-          <div class="section-header">🎬 Последние видео <button class="btn btn-pill btn-sm">🔍 Поиск</button></div>
-          ${data.videos.map((v, i) => `
-            <div class="video-item stagger-${i+1}">
-              <div class="video-thumb">${v.thumb}</div>
-              <strong style="color:var(--text-primary);">${v.title}</strong>
-              <div style="color:var(--text-secondary); font-size:0.75rem;">${v.desc}</div>
-              <button class="btn btn-neon btn-full" style="margin-top:8px;" onclick="window.open('${YOUTUBE_URL}', '_blank');">▶ Смотреть</button>
-            </div>
-          `).join('')}
         `;
             }
 
@@ -737,7 +758,6 @@
                 ${n.badge ? '<span class="badge-notif">'+n.badge+'</span>' : ''}
               </div>
               <div style="color:var(--text-secondary); font-size:0.75rem;">${n.text}</div>
-              <button class="btn btn-glass-depth btn-full" style="margin-top:8px;">Подробнее →</button>
             </div>
           `).join('')}
         `;
@@ -750,32 +770,12 @@
             <div style="color:var(--text-primary); font-weight:600;">Мнение: Альтсезон близко?</div>
             <div style="color:var(--text-secondary); font-size:0.75rem;">Анализ пары ETH/BTC...</div>
             <div style="display:flex; gap:14px; margin-top:8px; color:var(--accent);">👍 34 💬 12 🔖</div>
-            <button class="btn btn-pill btn-full" style="margin-top:8px;">💬 Комментировать</button>
           </div>
           <div class="post-item stagger-2">
             <div style="color:var(--text-primary); font-weight:600;">Обучение: Что такое TVL?</div>
             <div style="color:var(--text-secondary); font-size:0.75rem;">Total Value Locked объяснение.</div>
             <div style="display:flex; gap:14px; margin-top:8px; color:var(--accent);">👍 52 💬 8</div>
-            <button class="btn btn-pill btn-full" style="margin-top:8px;">💬 Комментировать</button>
           </div>
-        `;
-            }
-
-            function renderPolls() {
-                return `
-          <div class="section-header">📊 Опросы</div>
-          ${data.polls.map((p, i) => `
-            <div class="glass-card stagger-${i+1}" style="margin-bottom:10px;">
-              <div style="color:var(--text-primary); font-weight:600;">${p.question}</div>
-              ${p.options.map((opt, j) => `
-                <div style="margin-top:8px;">
-                  <div style="display:flex; justify-content:space-between; color:var(--text-secondary); font-size:0.75rem;"><span>${opt}</span><span>${p.votes[j]}%</span></div>
-                  <div class="poll-bar"><div class="poll-fill" style="width:${p.votes[j]}%;"></div></div>
-                </div>
-              `).join('')}
-              <button class="btn btn-glow btn-full" style="margin-top:10px;">🗳 Голосовать</button>
-            </div>
-          `).join('')}
         `;
             }
 
@@ -815,14 +815,6 @@
         `;
             }
 
-            function renderFAQ() {
-                return `
-          <div class="section-header">❓ FAQ</div>
-          <div class="news-item stagger-1" style="display:flex; justify-content:space-between; align-items:center;">🔹 Что такое стейкинг? <button class="btn btn-pill btn-sm">Ответ</button></div>
-          <div class="news-item stagger-2" style="display:flex; justify-content:space-between; align-items:center;">🔹 Безопасность активов <button class="btn btn-pill btn-sm">Ответ</button></div>
-        `;
-            }
-
             function renderProfile() {
                 return `
           <div class="welcome-banner stagger-1" style="text-align:center;">
@@ -835,9 +827,9 @@
             }
 
             const renderers = {
-                home: renderHome, videos: renderVideos, news: renderNews,
-                community: renderCommunity, polls: renderPolls, education: renderEducation,
-                links: renderLinks, portfolio: renderPortfolio, faq: renderFAQ, profile: renderProfile
+                home: renderHome, news: renderNews,
+                community: renderCommunity, education: renderEducation,
+                links: renderLinks, portfolio: renderPortfolio, profile: renderProfile
             };
 
             function navigate(section) {
@@ -851,7 +843,7 @@
             document.getElementById('mainContent').addEventListener('click', (e) => {
                 const navCard = e.target.closest('.nav-card');
                 if (navCard?.dataset.nav) navigate(navCard.dataset.nav);
-                if (e.target.closest('.btn') && !e.target.closest('.btn-youtube') && tg) tg.showAlert('✅ Готово!');
+                if (e.target.closest('.btn') && tg) tg.showAlert('✅ Готово!');
             });
 
             navigate('home');

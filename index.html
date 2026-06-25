@@ -113,8 +113,10 @@
             gap: 10px;
         }
 
+        /* ============ ВАША ЕМБЛЕМА ============ */
         .logo-icon {
-            background: linear-gradient(135deg, #c9a050, #a07828);
+            background: url('logo.png') center/cover no-repeat;
+            /* ЗАМІНІТЬ logo.png НА НАЗВУ ВАШОГО ФАЙЛА */
             width: 40px;
             height: 40px;
             border-radius: 13px;
@@ -250,12 +252,6 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08) 50%, transparent);
         }
 
-        .creator-name {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
         .accent {
             color: var(--accent);
         }
@@ -266,7 +262,6 @@
             color: var(--text-secondary);
         }
 
-        /* ============ СІТКА ============ */
         .grid-nav {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -276,7 +271,6 @@
             padding: 0;
         }
 
-        /* ============ LUXURY PILL BUTTONS ============ */
         .nav-card {
             background: linear-gradient(180deg, 
                 rgba(35, 30, 22, 0.5) 0%, 
@@ -420,7 +414,6 @@
             width: 100%;
         }
 
-        /* ============ КНОПКИ ДІЙ ============ */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -682,7 +675,7 @@
 
         <div class="header">
             <div class="logo-area">
-                <div class="logo-icon">📈</div>
+                <div class="logo-icon"></div>
                 <span class="brand-text">Дневник активов</span>
             </div>
         </div>
@@ -754,8 +747,7 @@
             function renderHome() {
                 return `
           <div class="welcome-banner">
-            <div class="creator-name">Дневник <span class="accent">активов</span></div>
-            <button class="btn btn-youtube btn-full" style="margin-top:12px;" onclick="event.stopPropagation(); window.open('${YOUTUBE_URL}', '_blank');">
+            <button class="btn btn-youtube btn-full" onclick="event.stopPropagation(); window.open('${YOUTUBE_URL}', '_blank');">
               ▶ YouTube канал
             </button>
           </div>

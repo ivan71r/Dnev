@@ -575,7 +575,11 @@
             transition: opacity 0.5s ease, visibility 0.5s ease;
         }
 
-        .loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loading-screen.hidden { 
+            opacity: 0; 
+            visibility: hidden; 
+            pointer-events: none; 
+        }
 
         .loader-ring {
             width: 36px; height: 36px;
@@ -611,18 +615,48 @@
     <script>
         (function() {
             const tg = window.Telegram?.WebApp;
-            if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('secondary_bg_color'); tg.setBackgroundColor('#06080c'); }
+            if (tg) { 
+                try {
+                    tg.ready(); 
+                    tg.expand(); 
+                    tg.setHeaderColor('secondary_bg_color'); 
+                    tg.setBackgroundColor('#06080c');
+                } catch(e) {
+                    console.log('Telegram WebApp init error:', e);
+                }
+            }
 
             const YOUTUBE_URL = 'https://www.youtube.com/@DnevnikAktivov';
             const NEWS_URL = 'https://t.me/dnevnikaktivovnews';
             const POSTS_URL = 'https://t.me/dnevnikaktivov';
 
             const loadingScreen = document.getElementById('loadingScreen');
-            window.addEventListener('load', () => { setTimeout(() => loadingScreen.classList.add('hidden'), 500); });
+            const mainContent = document.getElementById('mainContent');
+            
+            // Гарантовано прибираємо loading screen
+            function hideLoadingScreen() {
+                if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
+                    loadingScreen.classList.add('hidden');
+                }
+            }
 
+            // Прибираємо loading screen після завантаження
+            if (document.readyState === 'complete') {
+                setTimeout(hideLoadingScreen, 300);
+            } else {
+                window.addEventListener('load', () => {
+                    setTimeout(hideLoadingScreen, 300);
+                });
+            }
+
+            // Додатковий захист — прибираємо через 2 секунди в будь-якому випадку
+            setTimeout(hideLoadingScreen, 2000);
+
+            // Оптимізований обробник ripple ефекту
             document.addEventListener('click', function(e) {
                 const btn = e.target.closest('.btn');
                 if (!btn) return;
+                
                 const ripple = document.createElement('span');
                 ripple.classList.add('ripple');
                 const rect = btn.getBoundingClientRect();
@@ -631,7 +665,12 @@
                 ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
                 ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
                 btn.appendChild(ripple);
-                ripple.addEventListener('animationend', () => ripple.remove());
+                
+                ripple.addEventListener('animationend', () => {
+                    if (ripple.parentNode) {
+                        ripple.remove();
+                    }
+                });
             });
 
             const state = { section: 'home', bookmarks: new Set(), notifications: 3 };
@@ -772,24 +811,62 @@
             }
 
             const renderers = {
-                home: renderHome, education: renderEducation,
-                links: renderLinks, portfolio: renderPortfolio, profile: renderProfile
+                home: renderHome, 
+                education: renderEducation,
+                links: renderLinks, 
+                portfolio: renderPortfolio, 
+                profile: renderProfile
             };
 
+            let isNavigating = false;
+
             function navigate(section) {
+                if (isNavigating) return;
+                
+                isNavigating = true;
                 state.section = section;
-                const main = document.getElementById('mainContent');
-                main.innerHTML = renderers[section]?.() || '';
-                main.scrollTop = 0;
-                if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                
+                try {
+                    const content = renderers[section]?.() || '';
+                    if (mainContent) {
+                        mainContent.innerHTML = content;
+                        mainContent.scrollTop = 0;
+                    }
+                } catch(e) {
+                    console.error('Navigation error:', e);
+                }
+                
+                if (tg?.HapticFeedback) {
+                    try {
+                        tg.HapticFeedback.impactOccurred('light');
+                    } catch(e) {}
+                }
+                
+                setTimeout(() => {
+                    isNavigating = false;
+                }, 100);
             }
 
-            document.getElementById('mainContent').addEventListener('click', (e) => {
-                const navCard = e.target.closest('.nav-card');
-                if (navCard?.dataset.nav) navigate(navCard.dataset.nav);
-                if (e.target.closest('.btn-back')) navigate('home');
-            });
+            // Делегування подій для головного контенту
+            if (mainContent) {
+                mainContent.addEventListener('click', function(e) {
+                    const navCard = e.target.closest('.nav-card');
+                    if (navCard && navCard.dataset.nav) {
+                        e.preventDefault();
+                        navigate(navCard.dataset.nav);
+                        return;
+                    }
+                    
+                    const backBtn = e.target.closest('.btn-back');
+                    if (backBtn) {
+                        e.preventDefault();
+                        navigate('home');
+                        return;
+                    }
+                });
+            }
 
+            // Початкове завантаження
             navigate('home');
         })();
     </script>

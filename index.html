@@ -138,7 +138,6 @@
             background-clip: text;
         }
 
-        /* Шестерня з анімацією обертання */
         .admin-gear-btn {
             width: 36px;
             height: 36px;
@@ -151,7 +150,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             position: relative;
             z-index: 3;
         }
@@ -161,16 +160,14 @@
             color: var(--text-secondary);
         }
 
-        .admin-gear-btn:active {
-            transform: rotate(180deg) scale(0.9);
-            transition: all 0.2s ease;
+        .admin-gear-btn.spinning {
+            animation: gearSpin 0.6s ease;
         }
 
         .admin-gear-btn.active {
             background: rgba(201, 160, 80, 0.2);
             border-color: rgba(201, 160, 80, 0.4);
             color: var(--accent);
-            animation: gearSpin 0.6s ease;
         }
 
         @keyframes gearSpin {
@@ -195,7 +192,6 @@
         .main-content::-webkit-scrollbar-track { background: transparent; }
         .main-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
 
-        /* Смужка адміністратора */
         .admin-bar {
             display: flex;
             align-items: center;
@@ -248,17 +244,6 @@
             background: rgba(201, 160, 80, 0.3);
         }
 
-        .btn-admin.danger {
-            background: rgba(230, 57, 70, 0.1);
-            border-color: rgba(230, 57, 70, 0.3);
-            color: #ff6b6b;
-        }
-
-        .btn-admin.danger:hover {
-            background: rgba(230, 57, 70, 0.2);
-        }
-
-        /* Кнопки-іконки для редагування (олівець і кошик) */
         .edit-icon-btn {
             width: 28px;
             height: 28px;
@@ -292,7 +277,6 @@
             color: #ff6b6b;
         }
 
-        /* Модальне вікно */
         .edit-modal-overlay {
             position: fixed;
             inset: 0;
@@ -365,7 +349,6 @@
             border-color: var(--accent);
         }
 
-        /* Поле для завантаження зображення */
         .image-upload-area {
             border: 2px dashed rgba(255, 255, 255, 0.15);
             border-radius: 12px;
@@ -615,7 +598,6 @@
             transition: all 0.1s ease;
         }
 
-        /* Контейнер для кнопок редагування на картках */
         .edit-buttons-group {
             position: absolute;
             right: 6px;
@@ -893,12 +875,10 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Додаємо анімацію обертання
-                adminGearBtn.style.animation = 'none';
-                adminGearBtn.offsetHeight;
-                adminGearBtn.style.animation = 'gearSpin 0.6s ease';
+                adminGearBtn.classList.add('spinning');
                 
                 setTimeout(() => {
+                    adminGearBtn.classList.remove('spinning');
                     isAdminMode = !isAdminMode;
                     
                     if (isAdminMode) {
@@ -917,7 +897,6 @@
                 }, 300);
             });
 
-            // Функція для відкриття галереї
             function openImagePicker(callback) {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -930,6 +909,7 @@
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = function(event) {
+                            // Передаємо data URL та ім'я файлу
                             callback(event.target.result, file.name);
                         };
                         reader.readAsDataURL(file);
@@ -940,7 +920,6 @@
                 input.click();
             }
 
-            // Функція для створення модального вікна
             function showEditModal(title, fields, onSave) {
                 if (currentEditModal) {
                     document.body.removeChild(currentEditModal);
@@ -949,16 +928,20 @@
                 const overlay = document.createElement('div');
                 overlay.className = 'edit-modal-overlay';
                 
+                // Зберігаємо тимчасове зображення
+                let tempImageDataUrl = null;
+                
                 let fieldsHTML = '';
                 fields.forEach(field => {
                     if (field.type === 'image') {
+                        const imageValue = field.value || '';
                         fieldsHTML += `
                             <div class="field">
                                 <label>${field.label}</label>
                                 <div class="image-upload-area" id="modal_image_picker">
-                                    ${field.value ? `<img src="${field.value}" alt="Preview"><br>` : ''}
+                                    ${imageValue ? `<img src="${imageValue}" alt="Preview" style="max-width:80px; max-height:80px; border-radius:10px; margin-bottom:8px;"><br>` : ''}
                                     <span>📷 Нажмите чтобы выбрать изображение</span>
-                                    <input type="hidden" id="modal_${field.id}" value="${field.value || ''}">
+                                    <input type="hidden" id="modal_${field.id}" value="${imageValue}">
                                 </div>
                             </div>`;
                     } else {
@@ -988,18 +971,26 @@
                 if (imagePicker) {
                     imagePicker.addEventListener('click', function() {
                         openImagePicker(function(dataUrl, fileName) {
-                            const img = imagePicker.querySelector('img');
-                            const input = imagePicker.querySelector('input');
-                            if (img) {
-                                img.src = dataUrl;
+                            // Зберігаємо data URL тимчасово
+                            tempImageDataUrl = dataUrl;
+                            
+                            // Оновлюємо прев'ю
+                            const existingImg = imagePicker.querySelector('img');
+                            if (existingImg) {
+                                existingImg.src = dataUrl;
                             } else {
+                                const span = imagePicker.querySelector('span');
                                 const newImg = document.createElement('img');
                                 newImg.src = dataUrl;
                                 newImg.alt = 'Preview';
-                                imagePicker.insertBefore(newImg, imagePicker.firstChild);
-                                imagePicker.insertBefore(document.createElement('br'), imagePicker.children[1]);
+                                newImg.style.cssText = 'max-width:80px; max-height:80px; border-radius:10px; margin-bottom:8px;';
+                                imagePicker.insertBefore(newImg, span);
+                                imagePicker.insertBefore(document.createElement('br'), span);
                             }
-                            input.value = fileName;
+                            
+                            // Оновлюємо приховане поле з data URL
+                            const hiddenInput = imagePicker.querySelector('input');
+                            hiddenInput.value = dataUrl;
                         });
                     });
                 }
@@ -1014,7 +1005,9 @@
                     const values = {};
                     fields.forEach(field => {
                         const input = overlay.querySelector(`#modal_${field.id}`);
-                        values[field.id] = input ? input.value : '';
+                        if (input) {
+                            values[field.id] = input.value;
+                        }
                     });
                     closeEditModal();
                     if (onSave) onSave(values);
@@ -1222,7 +1215,6 @@
                     </div>`;
             }
 
-            // Функції редагування
             function editVideoPreview() {
                 showEditModal('Редактировать видео', [
                     { id: 'title', label: 'Название', value: state.videoData.title },
@@ -1323,7 +1315,7 @@
                     { id: 'name', label: 'Название', placeholder: 'Binance' },
                     { id: 'description', label: 'Описание', placeholder: 'Бонус' },
                     { id: 'url', label: 'Ссылка', placeholder: 'https://...' },
-                    { id: 'image', label: 'Логотип', type: 'image', placeholder: 'Выберите изображение' }
+                    { id: 'image', label: 'Логотип', type: 'image' }
                 ], (values) => {
                     if (!values.name || !values.url) return;
                     state.exchangeItems.push({
@@ -1423,7 +1415,6 @@
                 });
             }
 
-            // Експорт функцій
             window.editVideoPreview = editVideoPreview;
             window.addNavItem = addNavItem;
             window.editNavItem = editNavItem;

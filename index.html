@@ -542,6 +542,27 @@
 
         @keyframes badgePulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
 
+        .disclaimer-text {
+            text-align: center;
+            font-size: 0.68rem;
+            font-weight: 300;
+            letter-spacing: 0.03em;
+            line-height: 1.5;
+            color: rgba(136, 153, 180, 0.65);
+            padding: 16px 14px 6px;
+            margin-top: 6px;
+            font-style: italic;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            animation: fadeInUp 0.6s ease both;
+            animation-delay: 0.4s;
+        }
+
+        .disclaimer-text strong {
+            font-weight: 500;
+            color: rgba(201, 160, 80, 0.55);
+            font-style: normal;
+        }
+
         .loading-screen {
             position: absolute;
             inset: 0;
@@ -632,6 +653,10 @@
             <div class="nav-card stagger-2" data-nav="education"><span>📚</span>Обучение</div>
             <div class="nav-card stagger-2" data-nav="links"><span>🔗</span>Биржи</div>
             <div class="nav-card stagger-3" data-nav="portfolio"><span>💼</span>Портфель</div>
+          </div>
+          <div class="disclaimer-text">
+            Всё, что я показываю — это мой личный опыт и стратегия долгосрочных инвестиций.<br>
+            <strong>Это не финансовая рекомендация.</strong>
           </div>`;
             }
 
@@ -653,6 +678,11 @@
             <div style="color:var(--text-primary); font-weight:600;">🎓 Академия — полный путь инвестора</div>
             <div style="color:var(--text-secondary); font-size:0.75rem;">Полный курс по инвестированию</div>
             <button class="btn btn-neon btn-sm" style="margin-top:8px;" onclick="event.stopPropagation(); window.open('https://t.me/dnevnikaktivov/10899', '_blank');">Открыть</button>
+          </div>
+          <div class="news-item stagger-4" onclick="window.open('https://t.me/dnevnikaktivov/10195', '_blank');">
+            <div style="color:var(--text-primary); font-weight:600;">🏆 Все челленджи</div>
+            <div style="color:var(--text-secondary); font-size:0.75rem;">Все задания и челленджи одним списком</div>
+            <button class="btn btn-neon btn-sm" style="margin-top:8px;" onclick="event.stopPropagation(); window.open('https://t.me/dnevnikaktivov/10195', '_blank');">Открыть</button>
           </div>`;
             }
 

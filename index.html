@@ -1,536 +1,1117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Дневник активов | Asset Diary Premium</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Дневник активов | Asset Diary</title>
+    <style>
+        :root {
+            --bg-deep: #06080c;
+            --bg-surface: #0c1018;
+            --glass-bg: rgba(18, 22, 30, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.04);
+            --accent: #c9a050;
+            --accent-glow: rgba(201, 160, 80, 0.5);
+            --accent-soft: rgba(201, 160, 80, 0.12);
+            --text-primary: #e8ecf2;
+            --text-secondary: #8899b4;
+            --text-muted: #556078;
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 22px;
+            --radius-xl: 28px;
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.3);
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-primary: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
-      background: #06080c;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 12px;
-      margin: 0;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* Premium app shell */
-    .app-container {
-      max-width: 430px;
-      width: 100%;
-      height: 820px;
-      background: 
-        linear-gradient(135deg, rgba(10, 14, 20, 0.85), rgba(6, 8, 12, 0.92)),
-        url('bg.jpg') center/cover no-repeat;
-      border-radius: 38px;
-      box-shadow: 0 35px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.07);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      backdrop-filter: blur(20px);
-    }
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg-deep);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 8px;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-    /* Glassmorphism base */
-    .glass-card {
-      background: rgba(20, 25, 33, 0.6);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 24px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    }
+        /* ============ APP CONTAINER ============ */
+        .app-container {
+            max-width: 430px;
+            width: 100%;
+            height: 820px;
+            background: var(--bg-deep);
+            border-radius: 38px;
+            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.07);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
 
-    .glass-light {
-      background: rgba(30, 36, 46, 0.5);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 20px;
-    }
+        /* ============ АНІМОВАНИЙ ФОН ============ */
+        .bg-orbs {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            border-radius: 38px;
+        }
 
-    .header {
-      padding: 16px 20px 6px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.2;
+            animation: orbFloat 18s ease-in-out infinite;
+        }
 
-    .logo-area {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+        .bg-orb:nth-child(1) {
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(201, 160, 80, 0.3), transparent 70%);
+            top: -10%;
+            left: -15%;
+            animation-delay: 0s;
+            animation-duration: 20s;
+        }
 
-    .logo-icon {
-      background: linear-gradient(135deg, #f0b73e, #d4912a);
-      width: 40px;
-      height: 40px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 10px 18px rgba(240, 183, 62, 0.3);
-    }
+        .bg-orb:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(120, 140, 200, 0.2), transparent 70%);
+            bottom: -5%;
+            right: -10%;
+            animation-delay: -6s;
+            animation-duration: 18s;
+        }
 
-    .brand-text {
-      font-weight: 700;
-      font-size: 1.3rem;
-      letter-spacing: -0.3px;
-      background: linear-gradient(to right, #f0f4ff, #cbd5e6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+        .bg-orb:nth-child(3) {
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(180, 140, 100, 0.25), transparent 70%);
+            top: 40%;
+            left: 60%;
+            animation-delay: -12s;
+            animation-duration: 22s;
+        }
 
-    .pro-badge {
-      background: rgba(240, 183, 62, 0.15);
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #f0b73e;
-      letter-spacing: 0.5px;
-      border: 1px solid rgba(240, 183, 62, 0.35);
-    }
+        @keyframes orbFloat {
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(30px, -40px) scale(1.1);
+            }
+            50% {
+                transform: translate(-20px, 20px) scale(0.95);
+            }
+            75% {
+                transform: translate(-40px, -15px) scale(1.05);
+            }
+        }
 
-    .main-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px 16px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      scrollbar-width: thin;
-      scrollbar-color: #2a3340 #0f1319;
-    }
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.04;
+            border-radius: 38px;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255, 255, 255, 0.3) 60px, rgba(255, 255, 255, 0.3) 61px),
+                repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255, 255, 255, 0.3) 60px, rgba(255, 255, 255, 0.3) 61px);
+        }
 
-    .main-content::-webkit-scrollbar {
-      width: 4px;
-    }
-    .main-content::-webkit-scrollbar-track {
-      background: #0f1319;
-      border-radius: 8px;
-    }
-    .main-content::-webkit-scrollbar-thumb {
-      background: #2a3340;
-      border-radius: 8px;
-    }
+        .particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 38px;
+            overflow: hidden;
+        }
 
-    /* Typography */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #eef3ff;
-      font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 6px;
-    }
+        .particle {
+            position: absolute;
+            width: 1.5px;
+            height: 1.5px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleRise 7s ease-in infinite;
+        }
 
-    .welcome-banner {
-      background: linear-gradient(105deg, rgba(22, 30, 40, 0.85), rgba(12, 18, 26, 0.9));
-      border-radius: 26px;
-      padding: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(12px);
-    }
+        @keyframes particleRise {
+            0% {
+                opacity: 0;
+                transform: translateY(100%) scale(0);
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.15;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-10%) scale(1.5);
+            }
+        }
 
-    .creator-name {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: white;
-    }
+        /* ============ HEADER ============ */
+        .header {
+            padding: 16px 18px 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
 
-    .accent {
-      color: #f0b73e;
-    }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .chips {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
+        .logo-icon {
+            background: linear-gradient(135deg, #c9a050, #a07828);
+            width: 40px;
+            height: 40px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 8px 20px rgba(201, 160, 80, 0.35);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
 
-    .chip {
-      background: rgba(255, 255, 255, 0.06);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      color: #cfddee;
-      backdrop-filter: blur(5px);
-    }
+        @keyframes logoFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-4px);
+            }
+        }
 
-    .grid-nav {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin: 6px 0;
-    }
+        .brand-text {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -0.3px;
+            background: linear-gradient(to right, #e8ecf2, #bcc8d8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-    .nav-card {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(10px);
-      border-radius: 18px;
-      padding: 14px 4px;
-      text-align: center;
-      color: #bccfe0;
-      font-size: 0.7rem;
-      font-weight: 500;
-      border: 1px solid rgba(255, 255, 255, 0.03);
-      transition: 0.2s;
-      cursor: pointer;
-    }
-    .nav-card span {
-      display: block;
-      font-size: 1.5rem;
-      margin-bottom: 4px;
-    }
+        /* ============ MAIN CONTENT ============ */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 14px 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            position: relative;
+            z-index: 2;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+        }
 
-    .video-item, .news-item, .post-item {
-      background: rgba(18, 24, 32, 0.7);
-      backdrop-filter: blur(14px);
-      border-radius: 22px;
-      padding: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      margin-bottom: 12px;
-    }
+        .main-content::-webkit-scrollbar {
+            width: 3px;
+        }
+        .main-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .main-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+        }
 
-    .video-thumb {
-      background: linear-gradient(135deg, #243040, #151e28);
-      height: 90px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 10px;
-      font-size: 2rem;
-    }
+        /* ============ GLASSMORPHISM ============ */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-smooth);
+            animation: fadeInUp 0.6s ease both;
+        }
 
-    .btn-gold {
-      background: #f0b73e;
-      border: none;
-      color: #0a0c10;
-      font-weight: 700;
-      padding: 8px 18px;
-      border-radius: 30px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06) 30%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.06) 70%, transparent);
+        }
 
-    .bottom-nav {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 10px 12px 18px;
-      background: rgba(8, 12, 16, 0.85);
-      backdrop-filter: blur(30px);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 30px 30px 0 0;
-    }
+        .glass-card:active {
+            transform: scale(0.98);
+            transition: all 0.1s ease;
+        }
 
-    .nav-icon {
-      color: #6a7a8e;
-      font-size: 1.3rem;
-      text-align: center;
-      transition: 0.2s;
-      cursor: pointer;
-    }
-    .nav-icon.active {
-      color: #f0b73e;
-      text-shadow: 0 0 10px rgba(240, 183, 62, 0.6);
-    }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .poll-bar {
-      background: rgba(255, 255, 255, 0.06);
-      height: 6px;
-      border-radius: 6px;
-      margin: 8px 0;
-      overflow: hidden;
-    }
-    .poll-fill {
-      height: 6px;
-      background: #f0b73e;
-      border-radius: 6px;
-    }
+        .stagger-1 {
+            animation-delay: 0.05s;
+        }
+        .stagger-2 {
+            animation-delay: 0.1s;
+        }
+        .stagger-3 {
+            animation-delay: 0.15s;
+        }
+        .stagger-4 {
+            animation-delay: 0.2s;
+        }
 
-    .badge-notif {
-      background: #e63946;
-      border-radius: 12px;
-      padding: 2px 8px;
-      font-size: 0.7rem;
-      margin-left: 6px;
-      color: white;
-    }
-  </style>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+        /* ============ ТИПОГРАФІКА ============ */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            letter-spacing: -0.01em;
+        }
+
+        .welcome-banner {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease both;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06) 30%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.06) 70%, transparent);
+        }
+
+        .creator-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+        }
+
+        .accent {
+            color: var(--accent);
+        }
+        .text-muted {
+            color: var(--text-muted);
+        }
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+
+        /* ============ СІТКА НАВІГАЦІЇ ============ */
+        .grid-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 4px 0;
+        }
+
+        .nav-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: var(--radius-md);
+            padding: 14px 4px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all var(--transition-smooth);
+            cursor: pointer;
+            animation: fadeInUp 0.6s ease both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card span {
+            display: block;
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+            transition: transform var(--transition-smooth);
+        }
+
+        .nav-card:active {
+            transform: scale(0.94);
+            background: rgba(201, 160, 80, 0.15);
+            border-color: rgba(201, 160, 80, 0.3);
+            transition: all 0.1s ease;
+        }
+
+        /* ============ КАРТКИ КОНТЕНТУ ============ */
+        .video-item,
+        .news-item,
+        .post-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 10px;
+            transition: all var(--transition-smooth);
+            animation: fadeInUp 0.6s ease both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-item::before,
+        .news-item::before,
+        .post-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04) 50%, transparent);
+        }
+
+        .video-thumb {
+            background: linear-gradient(135deg, #1a2432, #101820);
+            height: 80px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* ============ КНОПКИ — ПОВНІСТЮ НОВИЙ ДИЗАЙН ============ */
+
+        /* База */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+            font-family: var(--font-primary);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ====== 1. ГОЛОВНА КНОПКА — СВІТНА ====== */
+        .btn-glow {
+            padding: 13px 28px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            background: radial-gradient(circle at 30% 30%, #d4a840, #8b6914);
+            color: #0a0c10;
+            box-shadow:
+                0 0 25px rgba(201, 160, 80, 0.5),
+                0 0 60px rgba(201, 160, 80, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-glow::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-glow:active::after {
+            opacity: 1;
+            transition: opacity 0s;
+        }
+
+        .btn-glow:active {
+            transform: scale(0.93);
+            box-shadow:
+                0 0 35px rgba(201, 160, 80, 0.7),
+                0 0 80px rgba(201, 160, 80, 0.3);
+            transition: all 0.1s ease;
+        }
+
+        /* ====== 2. НЕОНОВА КНОПКА З БОРДЕРОМ ====== */
+        .btn-neon {
+            padding: 12px 26px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            background: rgba(201, 160, 80, 0.05);
+            color: #d4a840;
+            border: 1.5px solid rgba(201, 160, 80, 0.4);
+            box-shadow:
+                0 0 12px rgba(201, 160, 80, 0.2),
+                inset 0 0 12px rgba(201, 160, 80, 0.05);
+            text-shadow: 0 0 10px rgba(201, 160, 80, 0.4);
+        }
+
+        .btn-neon::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 52px;
+            background: linear-gradient(45deg,
+                    transparent 40%,
+                    rgba(201, 160, 80, 0.3) 50%,
+                    transparent 60%);
+            background-size: 200% 200%;
+            animation: borderShine 3s linear infinite;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-neon:active::before {
+            opacity: 1;
+        }
+
+        .btn-neon:active {
+            background: rgba(201, 160, 80, 0.15);
+            border-color: #d4a840;
+            box-shadow:
+                0 0 30px rgba(201, 160, 80, 0.5),
+                0 0 60px rgba(201, 160, 80, 0.3);
+            transform: scale(0.94);
+            transition: all 0.1s ease;
+        }
+
+        @keyframes borderShine {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 200% 200%;
+            }
+        }
+
+        /* ====== 3. СКЛЯНА КНОПКА З ГЛИБИНОЮ ====== */
+        .btn-glass-depth {
+            padding: 11px 24px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            background:
+                linear-gradient(180deg,
+                    rgba(255, 255, 255, 0.06) 0%,
+                    rgba(255, 255, 255, 0.02) 100%);
+            color: #c0ccdc;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .btn-glass-depth::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-glass-depth:active::after {
+            opacity: 1;
+        }
+
+        .btn-glass-depth:active {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow:
+                0 6px 20px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transform: scale(0.94);
+            transition: all 0.1s ease;
+        }
+
+        /* ====== 4. КНОПКА-ПІГУЛКА З ГРАДІЄНТОМ ====== */
+        .btn-pill {
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            background: linear-gradient(135deg, rgba(201, 160, 80, 0.2), rgba(180, 130, 50, 0.08));
+            color: #d4a840;
+            border: 1px solid rgba(201, 160, 80, 0.25);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-pill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50px;
+            background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-pill:active::after {
+            opacity: 1;
+        }
+
+        .btn-pill:active {
+            background: linear-gradient(135deg, rgba(201, 160, 80, 0.35), rgba(180, 130, 50, 0.15));
+            border-color: rgba(201, 160, 80, 0.5);
+            box-shadow:
+                0 0 20px rgba(201, 160, 80, 0.3),
+                0 4px 12px rgba(0, 0, 0, 0.4);
+            transform: scale(0.94);
+            transition: all 0.1s ease;
+        }
+
+        /* ====== 5. КНОПКА-ХВИЛЯ (для дій) ====== */
+        .btn-wave {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            background: linear-gradient(180deg, #1a2432 0%, #0d1420 100%);
+            color: #e0e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-wave::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(201, 160, 80, 0.4);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .btn-wave:active::before {
+            width: 400px;
+            height: 400px;
+            transition: width 0s, height 0s;
+        }
+
+        .btn-wave:active {
+            border-color: rgba(201, 160, 80, 0.4);
+            box-shadow:
+                0 0 25px rgba(201, 160, 80, 0.3),
+                0 6px 20px rgba(0, 0, 0, 0.5);
+            transform: scale(0.94);
+            transition: all 0.1s ease;
+        }
+
+        /* Ripple для всіх кнопок */
+        .btn .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: rippleEffect 0.6s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(5);
+                opacity: 0;
+            }
+        }
+
+        /* Малі кнопки */
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.7rem;
+            border-radius: 40px;
+        }
+
+        /* ============ НИЖНЯ НАВІГАЦІЯ ============ */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 10px 14px;
+            background: rgba(8, 12, 16, 0.8);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 28px 28px 0 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .nav-icon {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 20px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-icon:active {
+            background: rgba(201, 160, 80, 0.1);
+            transform: scale(0.9);
+            transition: all 0.1s ease;
+        }
+
+        .nav-icon.active {
+            color: var(--accent);
+            text-shadow: 0 0 12px rgba(201, 160, 80, 0.5);
+            background: rgba(201, 160, 80, 0.1);
+        }
+
+        /* ============ POLL BAR ============ */
+        .poll-bar {
+            background: rgba(255, 255, 255, 0.05);
+            height: 5px;
+            border-radius: 5px;
+            margin: 7px 0;
+            overflow: hidden;
+        }
+
+        .poll-fill {
+            height: 5px;
+            background: linear-gradient(90deg, #c9a050, #d4b860);
+            border-radius: 5px;
+            transition: width 1s ease;
+            box-shadow: 0 0 10px rgba(201, 160, 80, 0.5);
+        }
+
+        /* ============ BADGE ============ */
+        .badge-notif {
+            background: #e63946;
+            border-radius: 10px;
+            padding: 2px 7px;
+            font-size: 0.65rem;
+            margin-left: 6px;
+            color: white;
+            font-weight: 600;
+            animation: badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* ============ LOADING ============ */
+        .loading-screen {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-deep);
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 38px;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-ring {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            border-top-color: var(--accent);
+            animation: spin 0.8s linear infinite;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div class="app-container" id="app">
-    <div class="header">
-      <div class="logo-area">
-        <div class="logo-icon">📈</div>
-        <span class="brand-text">Дневник активов</span>
-      </div>
-      <div class="pro-badge">PREMIUM</div>
+    <div class="app-container" id="app">
+        <div class="bg-orbs">
+            <div class="bg-orb"></div>
+            <div class="bg-orb"></div>
+            <div class="bg-orb"></div>
+        </div>
+        <div class="bg-grid"></div>
+        <div class="particles" id="particles"></div>
+
+        <div class="loading-screen" id="loadingScreen">
+            <div class="loader-ring"></div>
+        </div>
+
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-icon">📈</div>
+                <span class="brand-text">Дневник активов</span>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent"></div>
+
+        <div class="bottom-nav">
+            <div class="nav-icon active" data-section="home">🏠</div>
+            <div class="nav-icon" data-section="videos">🎬</div>
+            <div class="nav-icon" data-section="news">📰</div>
+            <div class="nav-icon" data-section="community">💬</div>
+            <div class="nav-icon" data-section="profile">👤</div>
+        </div>
     </div>
 
-    <div class="main-content" id="mainContent"></div>
+    <script>
+        (function() {
+            const tg = window.Telegram?.WebApp;
+            if (tg) {
+                tg.ready();
+                tg.expand();
+                tg.setHeaderColor('secondary_bg_color');
+                tg.setBackgroundColor('#06080c');
+            }
 
-    <div class="bottom-nav">
-      <div class="nav-icon active" data-section="home">🏠</div>
-      <div class="nav-icon" data-section="videos">🎬</div>
-      <div class="nav-icon" data-section="news">📰</div>
-      <div class="nav-icon" data-section="community">💬</div>
-      <div class="nav-icon" data-section="profile">👤</div>
-    </div>
-  </div>
+            const loadingScreen = document.getElementById('loadingScreen');
+            window.addEventListener('load', () => {
+                setTimeout(() => loadingScreen.classList.add('hidden'), 500);
+            });
 
-  <script>
-    (function() {
-      const tg = window.Telegram?.WebApp;
-      if (tg) {
-        tg.ready();
-        tg.expand();
-        tg.setHeaderColor('secondary_bg_color');
-        tg.setBackgroundColor('#06080c');
-      }
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 7 + 's';
+                particle.style.animationDuration = (5 + Math.random() * 8) + 's';
+                particle.style.width = (1 + Math.random() * 2) + 'px';
+                particle.style.height = particle.style.width;
+                particlesContainer.appendChild(particle);
+            }
 
-      const state = {
-        section: 'home',
-        bookmarks: new Set(),
-        notifications: 3
-      };
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn');
+                if (!btn) return;
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                const rect = btn.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+                btn.appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove());
+            });
 
-      // Extended content database
-      const data = {
-        videos: [
-          { title: "Биткоин после халвинга", desc: "Полный разбор рыночного цикла", thumb: "🎥" },
-          { title: "DeFi стратегии 2026", desc: "Пассивный доход в крипте", thumb: "📊" },
-          { title: "Альткоины: топ-5", desc: "Перспективные монеты", thumb: "🔮" }
-        ],
-        news: [
-          { title: "ETF приток $2.1B", badge: "Срочно", text: "Институционалы заходят в рынок." },
-          { title: "Регуляция США", text: "Новый законопроект о стейблкоинах." }
-        ],
-        polls: [
-          { question: "Курс BTC к декабрю?", options: ["$130k+", "$100-130k", "Ниже $100k"], votes: [58, 27, 15] }
-        ],
-        education: [
-          { title: "Блокчейн для начинающих", level: "Базовый" },
-          { title: "Продвинутый трейдинг", level: "Профи" },
-          { title: "Инвестиционные гиды", level: "Средний" }
-        ]
-      };
+            const state = {
+                section: 'home',
+                bookmarks: new Set(),
+                notifications: 3
+            };
 
-      function renderHome() {
-        return `
+            const data = {
+                videos: [
+                    { title: "Биткоин после халвинга", desc: "Полный разбор рыночного цикла", thumb: "🎥" },
+                    { title: "DeFi стратегии 2026", desc: "Пассивный доход в крипте", thumb: "📊" },
+                    { title: "Альткоины: топ-5", desc: "Перспективные монеты", thumb: "🔮" }
+                ],
+                news: [
+                    { title: "ETF приток $2.1B", badge: "Срочно", text: "Институционалы заходят в рынок." },
+                    { title: "Регуляция США", text: "Новый законопроект о стейблкоинах." }
+                ],
+                polls: [
+                    { question: "Курс BTC к декабрю?", options: ["$130k+", "$100-130k", "Ниже $100k"], votes: [58, 27,
+                            15
+                        ] }
+                ],
+                education: [
+                    { title: "Блокчейн для начинающих", level: "Базовый" },
+                    { title: "Продвинутый трейдинг", level: "Профи" },
+                    { title: "Инвестиционные гиды", level: "Средний" }
+                ]
+            };
+
+            function renderHome() {
+                return `
           <div class="welcome-banner">
-            <div style="display:flex; justify-content:space-between;">
-              <div>
-                <div class="creator-name">Алекс <span class="accent">Крипто</span></div>
-                <div style="color:#a0b3cc; font-size:0.8rem;">Дневник активов | Premium</div>
-              </div>
-              <div style="background:#f0b73e20; border-radius:20px; padding:6px 14px; color:#f0b73e;">⭐ 4.9</div>
-            </div>
-            <div class="chips">
-              <span class="chip">🔔 Новое видео</span>
-              <span class="chip">📊 Портфель +5.1%</span>
-              <span class="chip">💎 Premium открыт</span>
-            </div>
+            <div class="creator-name">Дневник <span class="accent">активов</span></div>
+            <div style="color:var(--text-muted); font-size:0.75rem; margin-top:4px;">Финансовый блог и обучение</div>
+            <button class="btn btn-glow btn-sm" style="margin-top:12px;">🔥 Смотреть последнее</button>
           </div>
           
           <div class="section-header">⚡ Быстрый доступ</div>
           <div class="grid-nav">
-            <div class="nav-card" data-nav="videos"><span>🎬</span>Видео</div>
-            <div class="nav-card" data-nav="news"><span>📰</span>Новости</div>
-            <div class="nav-card" data-nav="community"><span>💬</span>Посты</div>
-            <div class="nav-card" data-nav="polls"><span>📊</span>Опросы</div>
-            <div class="nav-card" data-nav="education"><span>📚</span>Обучение</div>
-            <div class="nav-card" data-nav="links"><span>🔗</span>Ссылки</div>
-            <div class="nav-card" data-nav="portfolio"><span>💼</span>Портфель</div>
-            <div class="nav-card" data-nav="faq"><span>❓</span>FAQ</div>
+            <div class="nav-card stagger-1" data-nav="videos"><span>🎬</span>Видео</div>
+            <div class="nav-card stagger-1" data-nav="news"><span>📰</span>Новости</div>
+            <div class="nav-card stagger-1" data-nav="community"><span>💬</span>Посты</div>
+            <div class="nav-card stagger-1" data-nav="polls"><span>📊</span>Опросы</div>
+            <div class="nav-card stagger-2" data-nav="education"><span>📚</span>Обучение</div>
+            <div class="nav-card stagger-2" data-nav="links"><span>🔗</span>Ссылки</div>
+            <div class="nav-card stagger-2" data-nav="portfolio"><span>💼</span>Портфель</div>
+            <div class="nav-card stagger-2" data-nav="faq"><span>❓</span>FAQ</div>
           </div>
 
           <div class="section-header">📢 Объявления <span class="badge-notif">2</span></div>
-          <div class="news-item">
-            <strong style="color:white;">Premium членство открыто</strong>
-            <p style="color:#b0c0d0; font-size:0.8rem;">Ранний доступ к альфа-отчётам.</p>
+          <div class="news-item stagger-3">
+            <strong style="color:var(--text-primary);">Новый урок по трейдингу</strong>
+            <p style="color:var(--text-muted); font-size:0.75rem;">Разбор стратегии управления рисками.</p>
+            <button class="btn btn-wave" style="margin-top:10px;">Смотреть урок</button>
           </div>
         `;
-      }
+            }
 
-      function renderVideos() {
-        return `
-          <div class="section-header">🎬 Последние видео <span style="font-size:0.7rem;">🔍 Поиск</span></div>
-          ${data.videos.map(v => `
-            <div class="video-item">
+            function renderVideos() {
+                return `
+          <div class="section-header">🎬 Последние видео <button class="btn btn-pill btn-sm">🔍 Поиск</button></div>
+          ${data.videos.map((v, i) => `
+            <div class="video-item stagger-${i + 1}">
               <div class="video-thumb">${v.thumb}</div>
-              <strong style="color:white;">${v.title}</strong>
-              <div style="color:#9aaec9; font-size:0.8rem;">${v.desc}</div>
-              <button class="btn-gold watch-btn">▶ Смотреть</button>
+              <strong style="color:var(--text-primary);">${v.title}</strong>
+              <div style="color:var(--text-secondary); font-size:0.75rem;">${v.desc}</div>
+              <button class="btn btn-neon" style="margin-top:8px;">▶ Смотреть</button>
             </div>
           `).join('')}
         `;
-      }
+            }
 
-      function renderNews() {
-        return `
+            function renderNews() {
+                return `
           <div class="section-header">📰 Новости и рынок</div>
-          ${data.news.map(n => `
-            <div class="news-item">
+          ${data.news.map((n, i) => `
+            <div class="news-item stagger-${i + 1}">
               <div style="display:flex; justify-content:space-between;">
-                <strong style="color:white;">${n.title}</strong>
-                ${n.badge ? '<span class="badge-notif">${n.badge}</span>' : ''}
+                <strong style="color:var(--text-primary);">${n.title}</strong>
+                ${n.badge ? '<span class="badge-notif">' + n.badge + '</span>' : ''}
               </div>
-              <div style="color:#b0c0d0; font-size:0.8rem;">${n.text}</div>
+              <div style="color:var(--text-secondary); font-size:0.75rem;">${n.text}</div>
+              <button class="btn btn-glass-depth btn-sm" style="margin-top:8px;">Подробнее →</button>
             </div>
           `).join('')}
         `;
-      }
+            }
 
-      function renderCommunity() {
-        return `
+            function renderCommunity() {
+                return `
           <div class="section-header">💬 Сообщество</div>
-          <div class="post-item">
-            <div style="color:white; font-weight:600;">Мнение: Альтсезон близко?</div>
-            <div style="color:#95a9c2;">Анализ пары ETH/BTC...</div>
-            <div style="display:flex; gap:16px; margin-top:10px; color:#f0b73e;">👍 34 💬 12 🔖</div>
+          <div class="post-item stagger-1">
+            <div style="color:var(--text-primary); font-weight:600;">Мнение: Альтсезон близко?</div>
+            <div style="color:var(--text-secondary); font-size:0.75rem;">Анализ пары ETH/BTC...</div>
+            <div style="display:flex; gap:14px; margin-top:8px; color:var(--accent); font-size:0.8rem;">👍 34 💬 12 🔖</div>
+            <button class="btn btn-pill btn-sm" style="margin-top:8px;">💬 Комментировать</button>
           </div>
-          <div class="post-item">
-            <div style="color:white; font-weight:600;">Обучение: Что такое TVL?</div>
-            <div style="color:#95a9c2;">Total Value Locked объяснение.</div>
-            <div style="display:flex; gap:16px; margin-top:10px; color:#f0b73e;">👍 52 💬 8</div>
+          <div class="post-item stagger-2">
+            <div style="color:var(--text-primary); font-weight:600;">Обучение: Что такое TVL?</div>
+            <div style="color:var(--text-secondary); font-size:0.75rem;">Total Value Locked объяснение.</div>
+            <div style="display:flex; gap:14px; margin-top:8px; color:var(--accent); font-size:0.8rem;">👍 52 💬 8</div>
+            <button class="btn btn-pill btn-sm" style="margin-top:8px;">💬 Комментировать</button>
           </div>
         `;
-      }
+            }
 
-      function renderPolls() {
-        return `
+            function renderPolls() {
+                return `
           <div class="section-header">📊 Опросы и голосования</div>
-          ${data.polls.map(p => `
-            <div class="glass-card" style="padding:16px; margin-bottom:14px;">
-              <div style="color:white; font-weight:600;">${p.question}</div>
-              ${p.options.map((opt, i) => `
-                <div style="margin-top:10px;">
-                  <div style="display:flex; justify-content:space-between; color:#cfddee; font-size:0.8rem;">
-                    <span>${opt}</span><span>${p.votes[i]}%</span>
+          ${data.polls.map((p, i) => `
+            <div class="glass-card stagger-${i + 1}" style="margin-bottom:10px;">
+              <div style="color:var(--text-primary); font-weight:600;">${p.question}</div>
+              ${p.options.map((opt, j) => `
+                <div style="margin-top:8px;">
+                  <div style="display:flex; justify-content:space-between; color:var(--text-secondary); font-size:0.75rem;">
+                    <span>${opt}</span><span>${p.votes[j]}%</span>
                   </div>
-                  <div class="poll-bar"><div class="poll-fill" style="width:${p.votes[i]}%;"></div></div>
+                  <div class="poll-bar"><div class="poll-fill" style="width:${p.votes[j]}%;"></div></div>
                 </div>
               `).join('')}
+              <button class="btn btn-glow" style="margin-top:10px; width:100%;">🗳 Голосовать</button>
             </div>
           `).join('')}
         `;
-      }
+            }
 
-      function renderEducation() {
-        return `
+            function renderEducation() {
+                return `
           <div class="section-header">📚 Крипто образование</div>
-          ${data.education.map(e => `
-            <div class="news-item" style="display:flex; justify-content:space-between;">
-              <span style="color:white;">${e.title}</span>
-              <span style="color:#f0b73e; font-size:0.7rem;">${e.level}</span>
+          ${data.education.map((e, i) => `
+            <div class="news-item stagger-${i + 1}" style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="color:var(--text-primary);">${e.title}</span>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <span style="color:var(--accent); font-size:0.7rem;">${e.level}</span>
+                <button class="btn btn-neon btn-sm">Старт</button>
+              </div>
             </div>
           `).join('')}
         `;
-      }
+            }
 
-      function renderLinks() {
-        return `
+            function renderLinks() {
+                return `
           <div class="section-header">🔗 Полезные ссылки</div>
-          <div class="news-item">📺 YouTube канал</div>
-          <div class="news-item">💱 Рекомендованные биржи</div>
-          <div class="news-item">📊 Трекер портфеля</div>
-          <div class="news-item">🤝 Партнёрские ресурсы</div>
+          <div class="news-item stagger-1" style="display:flex; justify-content:space-between; align-items:center;">📺 YouTube канал <button class="btn btn-glass-depth btn-sm">Открыть</button></div>
+          <div class="news-item stagger-2" style="display:flex; justify-content:space-between; align-items:center;">💱 Рекомендованные биржи <button class="btn btn-glass-depth btn-sm">Открыть</button></div>
+          <div class="news-item stagger-3" style="display:flex; justify-content:space-between; align-items:center;">📊 Трекер портфеля <button class="btn btn-glass-depth btn-sm">Открыть</button></div>
+          <div class="news-item stagger-4" style="display:flex; justify-content:space-between; align-items:center;">🤝 Партнёрские ресурсы <button class="btn btn-glass-depth btn-sm">Открыть</button></div>
         `;
-      }
+            }
 
-      function renderPortfolio() {
-        return `
+            function renderPortfolio() {
+                return `
           <div class="section-header">💼 Портфель создателя</div>
-          <div class="glass-card" style="padding:16px;">
-            <div style="color:white;">BTC 45% | ETH 30% | SOL 15% | Другое 10%</div>
-            <div class="poll-bar" style="margin:12px 0;"><div class="poll-fill" style="width:72%;"></div></div>
-            <div style="color:#a0b8d0;">+24.8% за всё время</div>
+          <div class="glass-card stagger-1">
+            <div style="color:var(--text-primary);">BTC 45% | ETH 30% | SOL 15% | Другое 10%</div>
+            <div class="poll-bar" style="margin:10px 0;"><div class="poll-fill" style="width:72%;"></div></div>
+            <div style="color:var(--text-secondary); font-size:0.8rem;">+24.8% за всё время</div>
+            <button class="btn btn-wave" style="margin-top:10px; width:100%;">📊 Подробная статистика</button>
           </div>
         `;
-      }
+            }
 
-      function renderFAQ() {
-        return `
+            function renderFAQ() {
+                return `
           <div class="section-header">❓ FAQ</div>
-          <div class="news-item">🔹 Что такое стейкинг?</div>
-          <div class="news-item">🔹 Как вступить в Premium?</div>
-          <div class="news-item">🔹 Безопасность активов</div>
+          <div class="news-item stagger-1">🔹 Что такое стейкинг? <button class="btn btn-pill btn-sm" style="margin-left:8px;">Ответ</button></div>
+          <div class="news-item stagger-2">🔹 Безопасность активов <button class="btn btn-pill btn-sm" style="margin-left:8px;">Ответ</button></div>
         `;
-      }
+            }
 
-      function renderProfile() {
-        return `
-          <div class="welcome-banner" style="text-align:center;">
-            <div style="font-size:3rem;">👤</div>
-            <div style="color:white; font-weight:700;">Профиль</div>
-            <div style="color:#b0c2d8;">Сохранено: ${state.bookmarks.size}</div>
-            <div style="color:#f0b73e;">Premium статус активен</div>
+            function renderProfile() {
+                return `
+          <div class="welcome-banner stagger-1" style="text-align:center;">
+            <div style="font-size:2.5rem;">👤</div>
+            <div style="color:var(--text-primary); font-weight:700;">Профиль</div>
+            <div style="color:var(--text-secondary); font-size:0.8rem;">Сохранено: ${state.bookmarks.size}</div>
+            <button class="btn btn-glow" style="margin-top:12px;">⚙ Настройки</button>
           </div>
         `;
-      }
+            }
 
-      const renderers = {
-        home: renderHome, videos: renderVideos, news: renderNews,
-        community: renderCommunity, polls: renderPolls, education: renderEducation,
-        links: renderLinks, portfolio: renderPortfolio, faq: renderFAQ, profile: renderProfile
-      };
+            const renderers = {
+                home: renderHome,
+                videos: renderVideos,
+                news: renderNews,
+                community: renderCommunity,
+                polls: renderPolls,
+                education: renderEducation,
+                links: renderLinks,
+                portfolio: renderPortfolio,
+                faq: renderFAQ,
+                profile: renderProfile
+            };
 
-      function navigate(section) {
-        state.section = section;
-        document.getElementById('mainContent').innerHTML = renderers[section]?.() || '';
-        document.querySelectorAll('.nav-icon').forEach(el => {
-          el.classList.toggle('active', el.dataset.section === section);
-        });
-        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-      }
+            function navigate(section) {
+                state.section = section;
+                const main = document.getElementById('mainContent');
+                main.innerHTML = renderers[section]?.() || '';
+                main.scrollTop = 0;
+                document.querySelectorAll('.nav-icon').forEach(el => {
+                    el.classList.toggle('active', el.dataset.section === section);
+                });
+                if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            }
 
-      // Event listeners
-      document.querySelectorAll('.nav-icon').forEach(icon => {
-        icon.addEventListener('click', (e) => navigate(e.currentTarget.dataset.section));
-      });
+            document.querySelectorAll('.nav-icon').forEach(icon => {
+                icon.addEventListener('click', (e) => navigate(e.currentTarget.dataset.section));
+            });
 
-      document.getElementById('mainContent').addEventListener('click', (e) => {
-        const navCard = e.target.closest('.nav-card');
-        if (navCard?.dataset.nav) navigate(navCard.dataset.nav);
-        if (e.target.classList.contains('watch-btn')) {
-          tg?.showAlert('🎬 Видео открывается...');
-        }
-        if (e.target.closest('.poll-bar')) {
-          tg?.showAlert('✅ Голос принят!');
-        }
-      });
+            document.getElementById('mainContent').addEventListener('click', (e) => {
+                const navCard = e.target.closest('.nav-card');
+                if (navCard?.dataset.nav) navigate(navCard.dataset.nav);
+                if (e.target.closest('.btn')) {
+                    if (tg) tg.showAlert('✅ Действие выполнено!');
+                }
+            });
 
-      // Initial load & simulated push
-      navigate('home');
-      setTimeout(() => {
-        const toast = document.createElement('div');
-        toast.style.position='absolute'; toast.style.top='70px'; toast.style.left='20px'; toast.style.right='20px';
-        toast.style.background='#f0b73e'; toast.style.color='#000'; toast.style.padding='12px';
-        toast.style.borderRadius='18px'; toast.style.fontWeight='bold';
-        toast.innerText='🔔 Новый эксклюзивный анализ!';
-        document.getElementById('app').appendChild(toast);
-        setTimeout(()=> toast.remove(), 3500);
-      }, 2500);
-    })();
-  </script>
+            navigate('home');
+
+            setTimeout(() => {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+            position:absolute; top:70px; left:16px; right:16px; z-index:10;
+            background:linear-gradient(135deg, #c9a050, #a07828); color:#000;
+            padding:12px 16px; border-radius:18px; font-weight:700; font-size:0.85rem;
+            box-shadow:0 10px 30px rgba(201,160,80,0.5);
+            animation: fadeInUp 0.5s ease;
+          `;
+                toast.innerText = '🔔 Новый эксклюзивный анализ!';
+                document.getElementById('app').appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.4s ease';
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+            }, 2000);
+        })();
+    </script>
 </body>
 </html>

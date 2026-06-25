@@ -1,141 +1,730 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Дневник Активов</title>
+    <title>Дневник Активов | Asset Diary</title>
     <style>
         :root {
-            --bg: #06080c;
-            --glass: rgba(18,22,30,0.45);
+            --bg-deep: #06080c;
+            --glass-bg: rgba(18, 22, 30, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.05);
             --accent: #c9a050;
-            --text: #e8ecf2;
-            --text2: #8899b4;
-            --r-lg: 22px;
-            --font: 'Inter', system-ui, sans-serif;
+            --accent-glow: rgba(201, 160, 80, 0.5);
+            --accent-soft: rgba(201, 160, 80, 0.12);
+            --text-primary: #e8ecf2;
+            --text-secondary: #8899b4;
+            --text-muted: #556078;
+            --radius-md: 16px;
+            --radius-lg: 22px;
+            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.3);
+            --font-primary: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { width:100%; height:100%; overflow:hidden; position:fixed; top:0; left:0; }
-        body { font-family:var(--font); background:var(--bg); display:flex; justify-content:center; align-items:center; min-height:100dvh; padding:8px; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent; touch-action:manipulation; overscroll-behavior:none; }
-        .app-container { max-width:430px; width:100%; height:100%; max-height:820px; background:linear-gradient(135deg, rgba(10,14,20,0.75), rgba(6,8,12,0.82)), url('bg.jpg') center/cover no-repeat; border-radius:38px; box-shadow:0 35px 60px rgba(0,0,0,0.8); overflow:hidden; display:flex; flex-direction:column; position:relative; }
-        @media (orientation:landscape) { .app-container { max-height:100%; border-radius:28px; } }
-        .bg-orbs { position:absolute; inset:0; pointer-events:none; z-index:0; border-radius:38px; }
-        .bg-orb { position:absolute; border-radius:50%; filter:blur(100px); opacity:0.12; animation:orbFloat 20s ease-in-out infinite; }
-        .bg-orb:nth-child(1) { width:200px; height:200px; background:radial-gradient(circle, rgba(201,160,80,0.4), transparent 70%); top:-8%; left:-12%; }
-        .bg-orb:nth-child(2) { width:160px; height:160px; background:radial-gradient(circle, rgba(120,140,200,0.3), transparent 70%); bottom:-5%; right:-8%; animation-delay:-8s; }
-        @keyframes orbFloat { 0%,100%{transform:translate(0,0)scale(1)} 50%{transform:translate(25px,-30px)scale(1.1)} }
-        .header { padding:16px 18px 4px; display:flex; align-items:center; position:relative; z-index:2; flex-shrink:0; }
-        .logo-area { display:flex; align-items:center; gap:10px; }
-        .logo-icon { background:url('logo.png') center/cover no-repeat; width:40px; height:40px; border-radius:13px; box-shadow:0 8px 20px rgba(201,160,80,0.35); animation:logoFloat 3s ease-in-out infinite; }
-        @keyframes logoFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-        .brand-text { font-weight:700; font-size:1.2rem; background:linear-gradient(to right, #e8ecf2, #bcc8d8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-        .main-content { flex:1; overflow-y:auto; padding:8px 14px 20px; display:flex; flex-direction:column; gap:10px; position:relative; z-index:2; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
-        .glass-card { background:rgba(18,22,30,0.4); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.05); border-radius:var(--r-lg); padding:18px; box-shadow:0 4px 16px rgba(0,0,0,0.3); }
-        .section-header { display:flex; justify-content:space-between; align-items:center; color:var(--text); font-weight:600; font-size:0.9rem; width:100%; }
-        .video-preview { background:rgba(18,22,30,0.4); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.05); border-radius:var(--r-lg); overflow:hidden; cursor:pointer; width:100%; flex-shrink:0; }
-        .video-preview:active { transform:scale(0.96); }
-        .video-preview-thumb { width:100%; height:200px; background:url('preview.jpg') center/cover no-repeat; display:flex; align-items:center; justify-content:center; position:relative; }
-        .video-preview-thumb::after { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.25); }
-        .play-btn { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:60px; height:60px; background:rgba(255,0,0,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 30px rgba(255,0,0,0.6); z-index:2; }
-        .play-btn::after { content:''; width:0; height:0; border-left:20px solid #fff; border-top:12px solid transparent; border-bottom:12px solid transparent; margin-left:4px; }
-        .video-preview-info { padding:14px; }
-        .video-preview-title { color:var(--text); font-weight:600; font-size:0.9rem; }
-        .video-preview-channel { color:var(--text2); font-size:0.75rem; }
-        .grid-nav { display:flex; flex-direction:column; gap:8px; width:100%; align-items:center; }
-        .nav-card { background:linear-gradient(180deg, rgba(35,30,22,0.5), rgba(22,18,10,0.55), rgba(30,24,13,0.5), rgba(18,14,7,0.6)); backdrop-filter:blur(10px); border-radius:35px; padding:10px 16px; color:#d4b860; font-size:0.65rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; width:100%; max-width:240px; border:1px solid rgba(201,160,80,0.3); box-shadow:0 0 10px rgba(201,160,80,0.15); transition:all 0.2s ease; overflow:hidden; position:relative; }
-        .nav-card span { font-size:1.2rem; transition:transform 0.2s; }
-        .nav-card:active { transform:scale(0.92); border-color:rgba(201,160,80,0.8); box-shadow:0 0 25px rgba(201,160,80,0.5); }
-        .nav-card:active span { transform:scale(0.85); }
-        .btn-back { background:rgba(255,255,255,0.04); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.08); border-radius:30px; padding:10px 18px; color:var(--text2); font-size:0.8rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; margin-bottom:4px; align-self:flex-start; transition:all 0.2s; }
-        .btn-back:active { transform:scale(0.9); background:rgba(201,160,80,0.2); }
-        .news-item { background:rgba(18,22,30,0.4); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.05); border-radius:var(--r-lg); padding:14px; margin-bottom:10px; width:100%; cursor:pointer; transition:all 0.2s; }
-        .news-item:active { transform:scale(0.97); border-color:rgba(201,160,80,0.4); }
-        .ex-logo { width:40px; height:40px; border-radius:10px; object-fit:contain; flex-shrink:0; transition:transform 0.2s; }
-        .news-item:active .ex-logo { transform:scale(0.9); }
-        .btn { display:inline-flex; align-items:center; justify-content:center; font-weight:600; cursor:pointer; border:none; font-family:var(--font); -webkit-tap-highlight-color:transparent; transition:all 0.15s; overflow:hidden; position:relative; }
-        .btn-neon { padding:8px 16px; border-radius:50px; font-size:0.7rem; background:rgba(201,160,80,0.1); color:#d4a840; border:1px solid rgba(201,160,80,0.35); flex-shrink:0; }
-        .btn-neon:active { background:rgba(201,160,80,0.25); border-color:#e0c060; transform:scale(0.9); }
-        .btn-glow { padding:13px 28px; border-radius:50px; font-size:0.85rem; background:radial-gradient(circle at 30% 30%, #d4a840, #8b6914); color:#0a0c10; box-shadow:0 0 25px rgba(201,160,80,0.5); }
-        .btn-glow:active { transform:scale(0.9); box-shadow:0 0 40px rgba(201,160,80,0.8); }
-        .btn-wave { padding:12px 30px; border-radius:50px; font-size:0.85rem; background:linear-gradient(180deg, rgba(26,36,50,0.7), rgba(13,20,32,0.7)); color:#e0e8f0; border:1px solid rgba(255,255,255,0.08); }
-        .btn-wave:active { border-color:rgba(201,160,80,0.5); transform:scale(0.92); }
-        .btn-full { width:100%; justify-content:center; }
-        .ripple { position:absolute; border-radius:50%; background:rgba(255,255,255,0.3); transform:scale(0); animation:rip 0.6s ease-out forwards; pointer-events:none; }
-        @keyframes rip { to { transform:scale(5); opacity:0; } }
-        .poll-bar { background:rgba(255,255,255,0.06); height:5px; border-radius:5px; margin:7px 0; overflow:hidden; }
-        .poll-fill { height:5px; background:linear-gradient(90deg, #c9a050, #d4b860); border-radius:5px; }
-        .loading-screen { position:absolute; inset:0; background:var(--bg); z-index:99; display:flex; align-items:center; justify-content:center; border-radius:38px; transition:opacity 0.5s; }
-        .loading-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
-        .loader-ring { width:36px; height:36px; border-radius:50%; border:2px solid rgba(255,255,255,0.06); border-top-color:var(--accent); animation:spin 0.8s linear infinite; }
-        @keyframes spin { to{transform:rotate(360deg)} }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg-deep);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 8px;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            max-width: 430px;
+            width: 100%;
+            height: 820px;
+            background:
+                linear-gradient(135deg, rgba(10, 14, 20, 0.75), rgba(6, 8, 12, 0.82)),
+                url('bg.jpg') center/cover no-repeat;
+            border-radius: 38px;
+            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.07);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .bg-orbs {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            border-radius: 38px;
+        }
+
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.12;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+
+        .bg-orb:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(201, 160, 80, 0.4), transparent 70%);
+            top: -8%;
+            left: -12%;
+        }
+
+        .bg-orb:nth-child(2) {
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(120, 140, 200, 0.3), transparent 70%);
+            bottom: -5%;
+            right: -8%;
+            animation-delay: -8s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(25px, -30px) scale(1.1); }
+        }
+
+        .header {
+            padding: 16px 18px 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            background: url('logo.png') center/cover no-repeat;
+            width: 40px;
+            height: 40px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 8px 20px rgba(201, 160, 80, 0.35);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .brand-text {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -0.3px;
+            background: linear-gradient(to right, #e8ecf2, #bcc8d8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 14px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+        }
+
+        .main-content::-webkit-scrollbar { width: 3px; }
+        .main-content::-webkit-scrollbar-track { background: transparent; }
+        .main-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+
+        .glass-card {
+            background: rgba(18, 22, 30, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.6s ease both;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 50%, transparent);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stagger-1 { animation-delay: 0.05s; }
+        .stagger-2 { animation-delay: 0.1s; }
+        .stagger-3 { animation-delay: 0.15s; }
+        .stagger-4 { animation-delay: 0.2s; }
+        .stagger-5 { animation-delay: 0.25s; }
+        .stagger-6 { animation-delay: 0.3s; }
+        .stagger-7 { animation-delay: 0.35s; }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            width: 100%;
+        }
+
+        .video-preview {
+            background: rgba(18, 22, 30, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease both;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            width: 100%;
+        }
+
+        .video-preview:hover { border-color: rgba(255,0,0,0.5); box-shadow: 0 0 25px rgba(255,0,0,0.3); }
+        .video-preview:active { transform: scale(0.97); transition: all 0.1s ease; }
+
+        .video-preview-thumb {
+            width: 100%;
+            height: 200px;
+            background: url('preview.jpg') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-preview-thumb::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.25);
+        }
+
+        .play-button-overlay {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px; height: 60px;
+            background: rgba(255,0,0,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255,0,0,0.6);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .play-button-overlay::after {
+            content: '';
+            width: 0; height: 0;
+            border-left: 20px solid white;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            margin-left: 4px;
+        }
+
+        .video-preview:hover .play-button-overlay {
+            transform: translate(-50%,-50%) scale(1.1);
+            box-shadow: 0 0 50px rgba(255,0,0,0.9);
+        }
+
+        .video-preview-info { padding: 14px; }
+        .video-preview-title { color: var(--text-primary); font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+        .video-preview-channel { color: var(--text-secondary); font-size: 0.75rem; }
+
+        .welcome-banner {
+            background: rgba(18,22,30,0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            animation: fadeInUp 0.6s ease both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 50%, transparent);
+        }
+
+        .accent { color: var(--accent); }
+        .text-muted { color: var(--text-muted); }
+        .text-secondary { color: var(--text-secondary); }
+
+        .grid-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 2px 0;
+            width: 100%;
+            padding: 0;
+            align-items: center;
+        }
+
+        .nav-card {
+            background: linear-gradient(180deg, 
+                rgba(35,30,22,0.5) 0%, 
+                rgba(22,18,10,0.55) 30%,
+                rgba(30,24,13,0.5) 60%,
+                rgba(18,14,7,0.6) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 35px;
+            padding: 10px 16px;
+            text-align: center;
+            color: #d4b860;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 240px;
+            position: relative;
+            transition: all 0.35s ease;
+            animation: fadeInUp 0.6s ease both;
+            border: 1px solid rgba(201,160,80,0.3);
+            box-shadow: 0 0 10px rgba(201,160,80,0.15), inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 8px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 2px; left: 12px; right: 12px;
+            height: 30%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0) 100%);
+            border-radius: 35px 35px 50% 50%;
+            pointer-events: none;
+        }
+
+        .nav-card::after {
+            content: '';
+            position: absolute;
+            bottom: 2px; left: 12px; right: 12px;
+            height: 15%;
+            background: linear-gradient(0deg, rgba(255,200,130,0.06) 0%, rgba(255,200,130,0) 100%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .nav-card span {
+            font-size: 1.2rem;
+            filter: drop-shadow(0 0 5px rgba(201,160,80,0.3));
+        }
+
+        .nav-card:hover { transform: translateY(-2px); border-color: rgba(201,160,80,0.5); }
+        .nav-card:active { transform: scale(0.95); border-color: rgba(201,160,80,0.7); }
+
+        .btn-back {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 30px;
+            padding: 10px 18px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            margin-bottom: 4px;
+            align-self: flex-start;
+        }
+
+        .btn-back:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+        .btn-back:active { transform: scale(0.95); background: rgba(201,160,80,0.15); border-color: rgba(201,160,80,0.4); }
+
+        .news-item {
+            background: rgba(18,22,30,0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 10px;
+            animation: fadeInUp 0.6s ease both;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 50%, transparent);
+        }
+
+        .news-item:hover { border-color: rgba(201,160,80,0.4); box-shadow: 0 0 20px rgba(201,160,80,0.2); }
+
+        .exchange-logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+            font-family: var(--font-primary);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            transition: all 0.25s ease;
+        }
+
+        .btn-neon {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            background: rgba(201,160,80,0.1);
+            color: #d4a840;
+            border: 1px solid rgba(201,160,80,0.35);
+            box-shadow: 0 0 10px rgba(201,160,80,0.15);
+            flex-shrink: 0;
+        }
+
+        .btn-neon:active { background: rgba(201,160,80,0.2); border-color: #d4a840; transform: scale(0.94); }
+
+        .btn-glow {
+            padding: 13px 28px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            background: radial-gradient(circle at 30% 30%, #d4a840, #8b6914);
+            color: #0a0c10;
+            box-shadow: 0 0 25px rgba(201,160,80,0.5), 0 0 60px rgba(201,160,80,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .btn-glow:active { transform: scale(0.93); box-shadow: 0 0 35px rgba(201,160,80,0.7); }
+
+        .btn-wave {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            background: linear-gradient(180deg, rgba(26,36,50,0.7) 0%, rgba(13,20,32,0.7) 100%);
+            color: #e0e8f0;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+
+        .btn-wave:active { border-color: rgba(201,160,80,0.4); transform: scale(0.94); }
+
+        .btn-sm { padding: 8px 16px; font-size: 0.7rem; border-radius: 40px; }
+        .btn-full { width: 100%; justify-content: center; }
+
+        .btn .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: scale(0);
+            animation: rippleEffect 0.6s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect { to { transform: scale(5); opacity: 0; } }
+
+        .poll-bar {
+            background: rgba(255,255,255,0.06);
+            height: 5px;
+            border-radius: 5px;
+            margin: 7px 0;
+            overflow: hidden;
+        }
+
+        .poll-fill {
+            height: 5px;
+            background: linear-gradient(90deg, #c9a050, #d4b860);
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(201,160,80,0.5);
+        }
+
+        .badge-notif {
+            background: #e63946;
+            border-radius: 10px;
+            padding: 2px 7px;
+            font-size: 0.65rem;
+            color: white;
+            font-weight: 600;
+            animation: badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+        .loading-screen {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-deep);
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 38px;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        .loader-ring {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.06);
+            border-top-color: var(--accent);
+            animation: spin 0.8s linear infinite;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="app-container" id="app">
-        <div class="bg-orbs"><div class="bg-orb"></div><div class="bg-orb"></div></div>
-        <div class="loading-screen" id="loadingScreen"><div class="loader-ring"></div></div>
-        <div class="header"><div class="logo-area"><div class="logo-icon"></div><span class="brand-text">Дневник Активов</span></div></div>
+        <div class="bg-orbs">
+            <div class="bg-orb"></div>
+            <div class="bg-orb"></div>
+        </div>
+        <div class="loading-screen" id="loadingScreen">
+            <div class="loader-ring"></div>
+        </div>
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-icon"></div>
+                <span class="brand-text">Дневник Активов</span>
+            </div>
+        </div>
         <div class="main-content" id="mainContent"></div>
     </div>
+
     <script>
         (function() {
             const tg = window.Telegram?.WebApp;
-            if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('secondary_bg_color'); tg.setBackgroundColor('#06080c'); tg.disableVerticalSwipes(); }
-            const YOUTUBE = 'https://www.youtube.com/@DnevnikAktivov';
-            const NEWS = 'https://t.me/dnevnikaktivovnews';
-            const POSTS = 'https://t.me/dnevnikaktivov';
-            const loading = document.getElementById('loadingScreen');
-            window.addEventListener('load', () => { setTimeout(() => loading.classList.add('hidden'), 400); });
+            if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor('secondary_bg_color'); tg.setBackgroundColor('#06080c'); }
+
+            const YOUTUBE_URL = 'https://www.youtube.com/@DnevnikAktivov';
+            const NEWS_URL = 'https://t.me/dnevnikaktivovnews';
+            const POSTS_URL = 'https://t.me/dnevnikaktivov';
+
+            const loadingScreen = document.getElementById('loadingScreen');
+            window.addEventListener('load', () => { setTimeout(() => loadingScreen.classList.add('hidden'), 500); });
+
             document.addEventListener('click', function(e) {
-                const el = e.target.closest('.btn, .nav-card, .btn-back, .news-item');
-                if (!el) return;
-                const r = document.createElement('span'); r.classList.add('ripple');
-                const rect = el.getBoundingClientRect();
-                const s = Math.max(rect.width, rect.height);
-                r.style.width = r.style.height = s + 'px';
-                r.style.left = (e.clientX - rect.left - s/2) + 'px';
-                r.style.top = (e.clientY - rect.top - s/2) + 'px';
-                el.appendChild(r);
-                r.addEventListener('animationend', () => r.remove());
+                const btn = e.target.closest('.btn');
+                if (!btn) return;
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                const rect = btn.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+                btn.appendChild(ripple);
+                ripple.addEventListener('animationend', () => ripple.remove());
             });
-            const state = { section: 'home' };
-            function home() {
-                return `<div class="video-preview" onclick="window.open('${YOUTUBE}','_blank');"><div class="video-preview-thumb"><div class="play-btn"></div></div><div class="video-preview-info"><div class="video-preview-title">▶ Новое видео на канале</div><div class="video-preview-channel">Дневник Активов • Нажмите чтобы смотреть</div></div></div><div class="grid-nav"><div class="nav-card" onclick="window.open('${NEWS}','_blank');"><span>📰</span>Новости</div><div class="nav-card" onclick="window.open('${POSTS}','_blank');"><span>💬</span>Посты</div><div class="nav-card" data-nav="edu"><span>📚</span>Обучение</div><div class="nav-card" data-nav="links"><span>🔗</span>Биржи</div><div class="nav-card" data-nav="portfolio"><span>💼</span>Портфель</div></div>`;
+
+            const state = { section: 'home', bookmarks: new Set(), notifications: 3 };
+
+            function renderHome() {
+                return `
+          <div class="video-preview stagger-1" onclick="window.open('${YOUTUBE_URL}', '_blank');">
+            <div class="video-preview-thumb">
+              <div class="play-button-overlay"></div>
+            </div>
+            <div class="video-preview-info">
+              <div class="video-preview-title">▶ Новое видео на канале</div>
+              <div class="video-preview-channel">Дневник Активов • Нажмите чтобы смотреть</div>
+            </div>
+          </div>
+          <div class="grid-nav">
+            <div class="nav-card stagger-1" onclick="window.open('${NEWS_URL}', '_blank');"><span>📰</span>Новости</div>
+            <div class="nav-card stagger-1" onclick="window.open('${POSTS_URL}', '_blank');"><span>💬</span>Посты</div>
+            <div class="nav-card stagger-2" data-nav="education"><span>📚</span>Обучение</div>
+            <div class="nav-card stagger-2" data-nav="links"><span>🔗</span>Биржи</div>
+            <div class="nav-card stagger-3" data-nav="portfolio"><span>💼</span>Портфель</div>
+          </div>`;
             }
-            function education() {
-                return `<button class="btn-back" onclick="nav('home');">← Назад</button><div class="section-header">📚 Крипто образование</div><div class="news-item" onclick="window.open('https://t.me/dnevnikaktivov_pervie1000','_blank');"><div style="color:var(--text);font-weight:600;">💰 Первые $1000 — база</div><div style="color:var(--text2);font-size:0.75rem;">Базовый курс для начинающих</div></div><div class="news-item" onclick="window.open('https://t.me/dnevnikaktivov/78','_blank');"><div style="color:var(--text);font-weight:600;">🔒 Секретный дневник — практика</div><div style="color:var(--text2);font-size:0.75rem;">Практические советы и стратегии</div></div><div class="news-item" onclick="window.open('https://t.me/dnevnikaktivov/10899','_blank');"><div style="color:var(--text);font-weight:600;">🎓 Академия — полный путь инвестора</div><div style="color:var(--text2);font-size:0.75rem;">Полный курс по инвестированию</div></div>`;
+
+            function renderEducation() {
+                return `
+          <button class="btn-back" onclick="navigate('home');">← Назад</button>
+          <div class="section-header">📚 Крипто образование</div>
+          <div class="news-item stagger-1" onclick="window.open('https://t.me/dnevnikaktivov_pervie1000', '_blank');">
+            <div style="color:var(--text-primary); font-weight:600;">💰 Первые $1000 — база</div>
+            <div style="color:var(--text-secondary); font-size:0.75rem;">Базовый курс для начинающих</div>
+            <button class="btn btn-neon btn-sm" style="margin-top:8px;" onclick="event.stopPropagation(); window.open('https://t.me/dnevnikaktivov_pervie1000', '_blank');">Открыть</button>
+          </div>
+          <div class="news-item stagger-2" onclick="window.open('https://t.me/dnevnikaktivov/78', '_blank');">
+            <div style="color:var(--text-primary); font-weight:600;">🔒 Секретный дневник — практика</div>
+            <div style="color:var(--text-secondary); font-size:0.75rem;">Практические советы и стратегии</div>
+            <button class="btn btn-neon btn-sm" style="margin-top:8px;" onclick="event.stopPropagation(); window.open('https://t.me/dnevnikaktivov/78', '_blank');">Открыть</button>
+          </div>
+          <div class="news-item stagger-3" onclick="window.open('https://t.me/dnevnikaktivov/10899', '_blank');">
+            <div style="color:var(--text-primary); font-weight:600;">🎓 Академия — полный путь инвестора</div>
+            <div style="color:var(--text-secondary); font-size:0.75rem;">Полный курс по инвестированию</div>
+            <button class="btn btn-neon btn-sm" style="margin-top:8px;" onclick="event.stopPropagation(); window.open('https://t.me/dnevnikaktivov/10899', '_blank');">Открыть</button>
+          </div>`;
             }
-            function links() {
-                return `<button class="btn-back" onclick="nav('home');">← Назад</button><div class="section-header">🔥 Биржи</div>` +
-                [{n:'Binance',b:'до $300 приветственный бонус',l:'https://www.binance.com/join?ref=3074',img:'binance.png'},
-                 {n:'ByBit',b:'скидка + до $4000 бонуса',l:'https://partner.bybit.com/b/dnevnikaktiv',img:'bybit.png'},
-                 {n:'Mexc',b:'код 1VqKK • бонус до $1,000 USDT',l:'https://www.mexc.com/register?inviteCode=1VqKK',img:'mexc.png'},
-                 {n:'Bingx',b:'код 46HZUC • бонус до $5,000 USDT',l:'https://bingx.com/invite/46HZUC',img:'bingx.png'},
-                 {n:'BITGET',b:'бонус до $30,000 USDT',l:'https://partner.bitget.com/bg/UDX26A',img:'bitget.png'},
-                 {n:'OKX',b:'код 36759163 • бонус до $64 000',l:'https://www.okx.com/join/36759163',img:'okx.png'},
-                 {n:'Gate',b:'код 15688798 • бонус $50 USDT',l:'https://go.gate.io/w/GMgPSct6',img:'gate.png'}
-                ].map(x => `<div class="news-item" onclick="window.open('${x.l}','_blank');" style="display:flex;align-items:center;gap:12px;"><img src="${x.img}" class="ex-logo" alt="${x.n}"><div style="flex:1;min-width:0;"><div style="color:var(--text);font-weight:600;font-size:0.85rem;">${x.n}</div><div style="color:var(--text2);font-size:0.7rem;">${x.b}</div></div><button class="btn btn-neon" onclick="event.stopPropagation();window.open('${x.l}','_blank');">Открыть</button></div>`).join('');
+
+            function renderLinks() {
+                return `
+          <button class="btn-back" onclick="navigate('home');">← Назад</button>
+          <div class="section-header">🔥 Биржи</div>
+          <div class="news-item stagger-1" onclick="window.open('https://www.binance.com/join?ref=3074', '_blank');" style="display:flex; align-items:center; gap:12px;">
+            <img src="binance.png" class="exchange-logo-img" alt="Binance">
+            <div style="flex:1;min-width:0;">
+              <div style="color:var(--text-primary);font-weight:600;font-size:0.85rem;">Binance</div>
+              <div style="color:var(--text-secondary);font-size:0.7rem;">до $300 приветственный бонус</div>
+            </div>
+            <button class="btn btn-neon" onclick="event.stopPropagation();window.open('https://www.binance.com/join?ref=3074','_blank');">Открыть</button>
+          </div>
+          <div class="news-item stagger-2" onclick="window.open('https://partner.bybit.com/b/dnevnikaktiv', '_blank');" style="display:flex; align-items:center; gap:12px;">
+            <img src="bybit.jpg" class="exchange-logo-img" alt="ByBit">
+            <div style="flex:1;min-width:0;">
+              <div style="color:var(--text-primary);font-weight:600;font-size:0.85rem;">ByBit</div>
+              <div style="color:var(--text-secondary);font-size:0.7rem;">скидка + до $4000 бонуса</div>
+            </div>
+            <button class="btn btn-neon" onclick="event.stopPropagation();window.open('https://partner.bybit.com/b/dnevnikaktiv','_blank');">Открыть</button>
+          </div>
+          <div class="news-item stagger-3" onclick="window.open('https://www.mexc.com/register?inviteCode=1VqKK', '_blank');" style="display:flex; align-items:center; gap:12px;">
+            <img src="mexc.png" class="exchange-logo-img" alt="Mexc">
+            <div style="flex:1;min-width:0;">
+              <div style="color:var(--text-primary);font-weight:600;font-size:0.85rem;">Mexc</div>
+              <div style="color:var(--text-secondary);font-size:0.7rem;">код 1VqKK • бонус до $1,000 USDT</div>
+            </div>
+            <button class="btn btn-neon" onclick="event.stopPropagation();window.open('https://www.mexc.com/register?inviteCode=1VqKK','_blank');">Открыть</button>
+          </div>
+          <div class="news-item stagger-4" onclick="window.open('https://bingx.com/invite/46HZUC', '_blank');" style="display:flex; align-items:center; gap:12px;">
+            <img src="bingx.png" class="exchange-logo-img" alt="Bingx">
+            <div style="flex:1;min-width:0;">
+              <div style="color:var(--text-primary);font-weight:600;font-size:0.85rem;">Bingx</div>
+              <div style="color:var(--text-secondary);font-size:0.7rem;">код 46HZUC • бонус до $5,000 USDT</div>
+            </div>
+            <button class="btn btn-neon" onclick="event.stopPropagation();window.open('https://bingx.com/invite/46HZUC','_blank');">Открыть</button>
+          </div>
+          <div class="news-item stagger-5" onclick="window.open('https://partner.bitget.com/bg/UDX26A', '_blank');" style="display:flex; align-items:center; gap:12px;">
+            <img src="bitget.png" class="exchange-logo-img" alt="BITGET">
+            <div style="flex:1;min-width:0;">
+              <div style="color:var(--text-primary);font-weight:600;font-size:0.85rem;">BITGET</div>
+              <div style="color:var(--text-secondary);font-size:0.7rem;">бонус до $30,000 USDT</div>
+            </div>
+            <button class="btn btn-neon" onclick="event.stopPropagation();window.open('https://partner.bitget.com/bg/UDX26A','_blank');">Открыть</button>
+          </div>
+          <div class="news-item stagger-6" onclick="window.open('https://www.okx.com/join/36759163', '_blank');" style="display:flex; align-items:center; gap:12px;">
+            <img src="okx.png" class="exchange-logo-img" alt="OKX">
+            <div style="flex:1;min-width:0;">
+              <div style="color:var(--text-primary);font-weight:600;font-size:0.85rem;">OKX</div>
+              <div style="color:var(--text-secondary);font-size:0.7rem;">код 36759163 • бонус до $64 000</div>
+            </div>
+            <button class="btn btn-neon" onclick="event.stopPropagation();window.open('https://www.okx.com/join/36759163','_blank');">Открыть</button>
+          </div>
+          <div class="news-item stagger-7" onclick="window.open('https://go.gate.io/w/GMgPSct6', '_blank');" style="display:flex; align-items:center; gap:12px;">
+            <img src="gate.jpg" class="exchange-logo-img" alt="Gate">
+            <div style="flex:1;min-width:0;">
+              <div style="color:var(--text-primary);font-weight:600;font-size:0.85rem;">Gate</div>
+              <div style="color:var(--text-secondary);font-size:0.7rem;">код 15688798 • бонус $50 USDT</div>
+            </div>
+            <button class="btn btn-neon" onclick="event.stopPropagation();window.open('https://go.gate.io/w/GMgPSct6','_blank');">Открыть</button>
+          </div>`;
             }
-            function portfolio() {
-                return `<button class="btn-back" onclick="nav('home');">← Назад</button><div class="section-header">💼 Портфель создателя</div><div class="glass-card"><div style="color:var(--text);">BTC 45% | ETH 30% | SOL 15% | Другое 10%</div><div class="poll-bar"><div class="poll-fill" style="width:72%;"></div></div><div style="color:var(--text2);">+24.8% за всё время</div><button class="btn btn-wave btn-full" style="margin-top:10px;">📊 Подробная статистика</button></div>`;
+
+            function renderPortfolio() {
+                return `
+          <button class="btn-back" onclick="navigate('home');">← Назад</button>
+          <div class="section-header">💼 Портфель создателя</div>
+          <div class="glass-card stagger-1">
+            <div style="color:var(--text-primary);">BTC 45% | ETH 30% | SOL 15% | Другое 10%</div>
+            <div class="poll-bar" style="margin:10px 0;"><div class="poll-fill" style="width:72%;"></div></div>
+            <div style="color:var(--text-secondary);">+24.8% за всё время</div>
+            <button class="btn btn-wave btn-full" style="margin-top:10px;">📊 Подробная статистика</button>
+          </div>`;
             }
-            function profile() {
-                return `<button class="btn-back" onclick="nav('home');">← Назад</button><div class="glass-card" style="text-align:center;"><div style="font-size:2.5rem;">👤</div><div style="color:var(--text);font-weight:700;">Профиль</div><button class="btn btn-glow btn-full" style="margin-top:12px;">⚙ Настройки</button></div>`;
+
+            function renderProfile() {
+                return `
+          <button class="btn-back" onclick="navigate('home');">← Назад</button>
+          <div class="welcome-banner stagger-1" style="text-align:center;">
+            <div style="font-size:2.5rem;">👤</div>
+            <div style="color:var(--text-primary); font-weight:700;">Профиль</div>
+            <div style="color:var(--text-secondary);">Сохранено: ${state.bookmarks.size}</div>
+            <button class="btn btn-glow btn-full" style="margin-top:12px;">⚙ Настройки</button>
+          </div>`;
             }
-            const pages = { home, edu: education, links, portfolio, profile };
-            function nav(s) {
-                state.section = s;
-                document.getElementById('mainContent').innerHTML = pages[s]?.() || '';
-                document.getElementById('mainContent').scrollTop = 0;
+
+            const renderers = {
+                home: renderHome, education: renderEducation,
+                links: renderLinks, portfolio: renderPortfolio, profile: renderProfile
+            };
+
+            function navigate(section) {
+                state.section = section;
+                const main = document.getElementById('mainContent');
+                main.innerHTML = renderers[section]?.() || '';
+                main.scrollTop = 0;
                 if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             }
-            document.getElementById('mainContent').addEventListener('click', e => {
-                const c = e.target.closest('.nav-card');
-                if (c?.dataset.nav) nav(c.dataset.nav);
-                if (e.target.closest('.btn-back')) nav('home');
+
+            document.getElementById('mainContent').addEventListener('click', (e) => {
+                const navCard = e.target.closest('.nav-card');
+                if (navCard?.dataset.nav) navigate(navCard.dataset.nav);
+                if (e.target.closest('.btn-back')) navigate('home');
             });
-            nav('home');
+
+            navigate('home');
         })();
     </script>
 </body>

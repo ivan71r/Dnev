@@ -39,13 +39,17 @@
             padding: 8px;
             margin: 0;
             -webkit-font-smoothing: antialiased;
-            overscroll-behavior: none; /* Блокує зсув всього mini app */
+            overscroll-behavior: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
 
         .app-container {
             max-width: 430px;
             width: 100%;
-            height: 820px;
+            height: 100%;
+            max-height: 820px;
             background:
                 linear-gradient(135deg, rgba(10, 14, 20, 0.75), rgba(6, 8, 12, 0.82)),
                 url('bg.jpg') center/cover no-repeat;
@@ -103,6 +107,7 @@
             justify-content: space-between;
             position: relative;
             z-index: 2;
+            flex-shrink: 0;
         }
 
         .header-left {
@@ -187,6 +192,7 @@
             z-index: 2;
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+            -webkit-overflow-scrolling: touch;
         }
 
         .main-content::-webkit-scrollbar { width: 3px; }
@@ -1175,7 +1181,7 @@
                     ${isAdminMode ? renderAdminBar('Редактирование обучения', function() { addEducationItem(); }, 'Курс') : ''}
                     <div class="section-header">📚 Крипто образование</div>
                     ${itemsHTML}
-                    <div style="min-height: 40px;"></div>`;
+                    <div style="min-height: 100px; width: 100%; flex-shrink: 0;"></div>`;
             }
 
             function renderLinks() {
@@ -1203,7 +1209,7 @@
                     ${isAdminMode ? renderAdminBar('Редактирование бирж', function() { addExchangeItem(); }, 'Биржу') : ''}
                     <div class="section-header">🔥 Биржи</div>
                     ${itemsHTML}
-                    <div style="min-height: 40px;"></div>`;
+                    <div style="min-height: 100px; width: 100%; flex-shrink: 0;"></div>`;
             }
 
             function renderWallets() {
@@ -1231,7 +1237,7 @@
                     ${isAdminMode ? renderAdminBar('Редактирование кошельков', function() { addWalletItem(); }, 'Кошелёк') : ''}
                     <div class="section-header">🔐 Крипто Кошельки</div>
                     ${itemsHTML}
-                    <div style="min-height: 40px;"></div>`;
+                    <div style="min-height: 100px; width: 100%; flex-shrink: 0;"></div>`;
             }
 
             function renderPortfolio() {
@@ -1249,18 +1255,7 @@
                             <button class="btn btn-wave btn-full" style="margin-top:10px;">📊 Подробная статистика</button>
                         `}
                     </div>
-                    <div style="min-height: 40px;"></div>`;
-            }
-
-            function renderProfile() {
-                return `
-                    <button class="btn-back" onclick="navigate('home');">← Назад</button>
-                    <div class="welcome-banner stagger-1" style="text-align:center;">
-                        <div style="font-size:2.5rem;">👤</div>
-                        <div style="color:var(--text-primary); font-weight:700;">Профиль</div>
-                        <div style="color:var(--text-secondary);">Сохранено: ${state.bookmarks.size}</div>
-                        <button class="btn btn-glow btn-full" style="margin-top:12px;">⚙ Настройки</button>
-                    </div>`;
+                    <div style="min-height: 100px; width: 100%; flex-shrink: 0;"></div>`;
             }
 
             function editVideoPreview() {
@@ -1460,8 +1455,7 @@
                 education: renderEducation,
                 links: renderLinks, 
                 wallets: renderWallets,
-                portfolio: renderPortfolio, 
-                profile: renderProfile
+                portfolio: renderPortfolio
             };
 
             let isNavigating = false;
@@ -1474,13 +1468,30 @@
                 try {
                     const content = renderers[section]?.() || '';
                     if (mainContent) {
-                        mainContent.innerHTML = content;
-                        mainContent.scrollTop = 0;
+                        // Спершу очищаємо контент
+                        mainContent.innerHTML = '';
+                        
+                        // Використовуємо requestAnimationFrame для гарантованого скидання
+                        requestAnimationFrame(() => {
+                            mainContent.innerHTML = content;
+                            
+                            // Примусове скидання скролу на початок
+                            requestAnimationFrame(() => {
+                                mainContent.scrollTop = 0;
+                                // Додатковий спосіб для iOS Safari
+                                if (mainContent.scrollTo) {
+                                    mainContent.scrollTo(0, 0);
+                                }
+                            });
+                        });
                     }
                 } catch(e) {
                     if (mainContent && section !== 'home') {
                         try { 
                             mainContent.innerHTML = renderers.home(); 
+                            requestAnimationFrame(() => {
+                                mainContent.scrollTop = 0;
+                            });
                         } catch(e2) {}
                     }
                 }

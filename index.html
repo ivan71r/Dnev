@@ -202,8 +202,6 @@
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-            touch-action: pan-y;
         }
 
         .main-content::-webkit-scrollbar { width: 3px; }
@@ -1506,15 +1504,10 @@
             };
 
             let isNavigating = false;
-            const scrollPositions = {};
 
             function navigate(section) {
                 if (isNavigating) return;
                 isNavigating = true;
-                
-                if (mainContent && state.section) {
-                    scrollPositions[state.section] = mainContent.scrollTop;
-                }
                 
                 state.section = section;
                 
@@ -1522,13 +1515,14 @@
                     const content = renderers[section]?.() || '';
                     if (mainContent) {
                         mainContent.innerHTML = content;
-                        mainContent.scrollTop = scrollPositions[section] || 0;
+                        // Завжди скидаємо прокрутку на початок при переході в розділ
+                        mainContent.scrollTop = 0;
                     }
                 } catch(e) {
                     if (mainContent && section !== 'home') {
                         try { 
                             mainContent.innerHTML = renderers.home();
-                            mainContent.scrollTop = scrollPositions['home'] || 0;
+                            mainContent.scrollTop = 0;
                         } catch(e2) {}
                     }
                 }

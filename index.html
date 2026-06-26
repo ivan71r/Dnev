@@ -188,6 +188,14 @@
             scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
         }
 
+        /* ТІЛЬКИ для розділів — фіксуємо mini app при прокрутці */
+        .main-content.section-scroll {
+            overscroll-behavior: contain;
+        }
+
+        /* ДЛЯ МЕНЮ — залишаємо як було (без overscroll-behavior: contain) */
+        /* .main-content без класу .section-scroll поводиться як оригінал */
+
         .main-content::-webkit-scrollbar { width: 3px; }
         .main-content::-webkit-scrollbar-track { background: transparent; }
         .main-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
@@ -696,6 +704,7 @@
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             transition: all 0.25s ease;
+            white-space: nowrap;
         }
 
         .btn-neon {
@@ -1155,12 +1164,12 @@
                 let itemsHTML = '';
                 state.educationItems.forEach((item, index) => {
                     itemsHTML += `
-                        <div class="news-item stagger-${index + 1}" onclick="window.open('${item.url}', '_blank');">
-                            <div style="color:var(--text-primary); font-weight:600; padding-right: ${isAdminMode ? '60px' : '0'};">${item.title}</div>
-                            <div style="color:var(--text-secondary); font-size:0.75rem;">${item.description}</div>
+                        <div class="news-item stagger-${index + 1}" onclick="window.open('${item.url}', '_blank');" style="position: relative; overflow: visible;">
+                            <div style="color:var(--text-primary); font-weight:600; padding-right: ${isAdminMode ? '60px' : '0'}; margin-bottom: 12px;">${item.title}</div>
+                            <div style="color:var(--text-secondary); font-size:0.75rem; margin-bottom: 12px;">${item.description}</div>
                             <button class="btn btn-neon btn-sm" style="margin-top:8px;" onclick="event.stopPropagation(); window.open('${item.url}', '_blank');">Открыть</button>
                             ${isAdminMode ? `
-                                <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;">
+                                <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 5;">
                                     <button class="edit-icon-btn edit" onclick="event.stopPropagation(); editEducationItem(${index});" title="Редактировать">✏️</button>
                                     <button class="edit-icon-btn delete" onclick="event.stopPropagation(); deleteEducationItem(${index});" title="Удалить">🗑️</button>
                                 </div>
@@ -1187,7 +1196,7 @@
                             </div>
                             <button class="btn btn-neon" onclick="event.stopPropagation();window.open('${item.url}','_blank');">Открыть</button>
                             ${isAdminMode ? `
-                                <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px;">
+                                <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px; z-index: 5;">
                                     <button class="edit-icon-btn edit" onclick="event.stopPropagation(); editExchangeItem(${index});" title="Редактировать">✏️</button>
                                     <button class="edit-icon-btn delete" onclick="event.stopPropagation(); deleteExchangeItem(${index});" title="Удалить">🗑️</button>
                                 </div>
@@ -1214,7 +1223,7 @@
                             </div>
                             <button class="btn btn-neon" onclick="event.stopPropagation();window.open('${item.url}','_blank');">Открыть</button>
                             ${isAdminMode ? `
-                                <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px;">
+                                <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px; z-index: 5;">
                                     <button class="edit-icon-btn edit" onclick="event.stopPropagation(); editWalletItem(${index});" title="Редактировать">✏️</button>
                                     <button class="edit-icon-btn delete" onclick="event.stopPropagation(); deleteWalletItem(${index});" title="Удалить">🗑️</button>
                                 </div>
@@ -1470,10 +1479,20 @@
                     if (mainContent) {
                         mainContent.innerHTML = content;
                         mainContent.scrollTop = 0;
+                        
+                        // Додаємо клас section-scroll ТІЛЬКИ для розділів (не для home)
+                        if (section === 'home') {
+                            mainContent.classList.remove('section-scroll');
+                        } else {
+                            mainContent.classList.add('section-scroll');
+                        }
                     }
                 } catch(e) {
                     if (mainContent && section !== 'home') {
-                        try { mainContent.innerHTML = renderers.home(); } catch(e2) {}
+                        try { 
+                            mainContent.innerHTML = renderers.home(); 
+                            mainContent.classList.remove('section-scroll');
+                        } catch(e2) {}
                     }
                 }
                 

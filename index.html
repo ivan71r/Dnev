@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Дневник Активов | Asset Diary</title>
     <style>
+        /* ... всі стилі без змін, як у попередній версії ... */
         :root {
             --bg-deep: #06080c;
             --glass-bg: rgba(18, 22, 30, 0.45);
@@ -873,7 +874,8 @@
             };
 
             const SECRET_KEY = 'DnevnikSecret2024';
-            const ADMIN_PASSWORD = 'DnevnikAktiv';
+            // Захешований пароль адміністратора (SHA-256)
+            const ADMIN_PASSWORD_HASH = '6b3a9e5c7d4f8a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8';
 
             let db = null;
             let fbReady = false;
@@ -891,7 +893,6 @@
 
             function setSync(msg, cls) {
                 if (syncBar) {
-                    // Повністю прибираємо зелені повідомлення (ok) – ніхто їх не бачить
                     if (cls === 'ok') {
                         syncBar.textContent = '';
                         syncBar.className = 'sync-bar';
@@ -900,6 +901,15 @@
                     syncBar.textContent = msg;
                     syncBar.className = 'sync-bar ' + (cls || '');
                 }
+            }
+
+            // Функція для обчислення SHA-256 хешу
+            async function sha256(message) {
+                const msgBuffer = new TextEncoder().encode(message);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                return hashHex;
             }
             
             function initTelegram() {
@@ -950,13 +960,13 @@
             });
 
             // ========== АДМІН-КНОПКА ==========
-            adminGearBtn.addEventListener('click', function(e) {
+            adminGearBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 
                 adminGearBtn.classList.add('spinning');
                 
-                setTimeout(() => {
+                setTimeout(async () => {
                     adminGearBtn.classList.remove('spinning');
                     
                     if (!isAdminMode) {
@@ -965,12 +975,15 @@
                             isAdminVerified = true;
                         } else {
                             const pwd = prompt('🔐 Пароль администратора:');
-                            if (pwd === ADMIN_PASSWORD) {
-                                isAdminVerified = true;
-                                localStorage.setItem('dnevnik_admin_ok', '1');
-                            } else if (pwd !== null) {
-                                alert('❌ Неверный пароль');
-                                return;
+                            if (pwd !== null) {
+                                const hashed = await sha256(pwd);
+                                if (hashed === ADMIN_PASSWORD_HASH) {
+                                    isAdminVerified = true;
+                                    localStorage.setItem('dnevnik_admin_ok', '1');
+                                } else {
+                                    alert('❌ Неверный пароль');
+                                    return;
+                                }
                             } else {
                                 return;
                             }

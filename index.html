@@ -587,6 +587,13 @@
             z-index: 1;
         }
 
+        /* НОВИЙ КЛАС ДЛЯ ЗМЕНШЕНОГО ШРИФТУ НА КНОПКАХ МЕНЮ */
+        .nav-card .nav-text-sm {
+            font-size: 0.55rem;
+            position: relative;
+            z-index: 1;
+        }
+
         .nav-card:hover { 
             transform: translateY(-2px); 
             border-color: rgba(201,160,80,0.5); 
@@ -1101,7 +1108,7 @@
                     navCardsHTML += `
                         <div class="nav-card stagger-${index + 1}" ${clickHandler}>
                             <span>${item.emoji}</span>
-                            <span class="nav-text">${item.text}</span>
+                            <span class="nav-text-sm">${item.text}</span>
                             ${isAdminMode ? `
                                 <div class="edit-buttons-group">
                                     <button class="edit-icon-btn edit" onclick="event.stopPropagation(); editNavItem(${index});" title="Редактировать">✏️</button>

@@ -39,7 +39,7 @@
             padding: 8px;
             margin: 0;
             -webkit-font-smoothing: antialiased;
-            overscroll-behavior: none;
+            overflow: hidden;
             position: fixed;
             width: 100%;
             height: 100%;
@@ -190,8 +190,6 @@
             gap: 10px;
             position: relative;
             z-index: 2;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -213,6 +211,7 @@
             font-size: 0.75rem;
             color: var(--accent);
             font-weight: 500;
+            flex-shrink: 0;
         }
 
         .admin-bar-actions {
@@ -463,6 +462,7 @@
             transition: all 0.3s ease;
             position: relative;
             width: 100%;
+            flex-shrink: 0;
         }
 
         .video-preview:hover { border-color: rgba(255,0,0,0.5); box-shadow: 0 0 25px rgba(255,0,0,0.3); }
@@ -528,6 +528,7 @@
             font-size: 0.9rem;
             margin-bottom: 4px;
             width: 100%;
+            flex-shrink: 0;
         }
 
         .grid-nav {
@@ -642,6 +643,7 @@
             transition: all 0.3s ease;
             margin-bottom: 4px;
             align-self: flex-start;
+            flex-shrink: 0;
         }
 
         .btn-back:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
@@ -660,6 +662,7 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .news-item::before {
@@ -863,7 +866,6 @@
 
             const loadingScreen = document.getElementById('loadingScreen');
             const mainContent = document.getElementById('mainContent');
-            const appContainer = document.getElementById('app');
             const adminGearBtn = document.getElementById('adminGearBtn');
             
             function hideLoadingScreen() {
@@ -949,8 +951,6 @@
                 const overlay = document.createElement('div');
                 overlay.className = 'edit-modal-overlay';
                 
-                let tempImageDataUrl = null;
-                
                 let fieldsHTML = '';
                 fields.forEach(field => {
                     if (field.type === 'image') {
@@ -989,9 +989,7 @@
                 const imagePicker = overlay.querySelector('#modal_image_picker');
                 if (imagePicker) {
                     imagePicker.addEventListener('click', function() {
-                        openImagePicker(function(dataUrl, fileName) {
-                            tempImageDataUrl = dataUrl;
-                            
+                        openImagePicker(function(dataUrl) {
                             const existingImg = imagePicker.querySelector('img');
                             if (existingImg) {
                                 existingImg.src = dataUrl;
@@ -1004,26 +1002,18 @@
                                 imagePicker.insertBefore(newImg, span);
                                 imagePicker.insertBefore(document.createElement('br'), span);
                             }
-                            
                             const hiddenInput = imagePicker.querySelector('input');
                             hiddenInput.value = dataUrl;
                         });
                     });
                 }
                 
-                setTimeout(() => {
-                    const firstInput = overlay.querySelector('input[type="text"]');
-                    if (firstInput) firstInput.focus();
-                }, 100);
-                
                 overlay.querySelector('#modalCancel').addEventListener('click', closeEditModal);
                 overlay.querySelector('#modalSave').addEventListener('click', () => {
                     const values = {};
                     fields.forEach(field => {
                         const input = overlay.querySelector(`#modal_${field.id}`);
-                        if (input) {
-                            values[field.id] = input.value;
-                        }
+                        if (input) values[field.id] = input.value;
                     });
                     closeEditModal();
                     if (onSave) onSave(values);
@@ -1031,12 +1021,6 @@
                 
                 overlay.addEventListener('click', function(e) {
                     if (e.target === overlay) closeEditModal();
-                });
-                
-                overlay.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                        overlay.querySelector('#modalSave').click();
-                    }
                 });
             }
 
@@ -1163,7 +1147,7 @@
                 let itemsHTML = '';
                 state.educationItems.forEach((item, index) => {
                     itemsHTML += `
-                        <div class="news-item stagger-${index + 1}" onclick="window.open('${item.url}', '_blank');" style="position: relative; overflow: visible;">
+                        <div class="news-item stagger-${index + 1}" onclick="window.open('${item.url}', '_blank');" style="overflow: visible;">
                             <div style="color:var(--text-primary); font-weight:600; padding-right: ${isAdminMode ? '60px' : '0'}; margin-bottom: 12px;">${item.title}</div>
                             <div style="color:var(--text-secondary); font-size:0.75rem; margin-bottom: 12px;">${item.description}</div>
                             <button class="btn btn-neon btn-sm" style="margin-top:8px;" onclick="event.stopPropagation(); window.open('${item.url}', '_blank');">Открыть</button>
@@ -1181,7 +1165,7 @@
                     ${isAdminMode ? renderAdminBar('Редактирование обучения', function() { addEducationItem(); }, 'Курс') : ''}
                     <div class="section-header">📚 Крипто образование</div>
                     ${itemsHTML}
-                    <div style="min-height: 100px; width: 100%; flex-shrink: 0;"></div>`;
+                    <div style="min-height: 80px; flex-shrink: 0;"></div>`;
             }
 
             function renderLinks() {
@@ -1209,7 +1193,7 @@
                     ${isAdminMode ? renderAdminBar('Редактирование бирж', function() { addExchangeItem(); }, 'Биржу') : ''}
                     <div class="section-header">🔥 Биржи</div>
                     ${itemsHTML}
-                    <div style="min-height: 100px; width: 100%; flex-shrink: 0;"></div>`;
+                    <div style="min-height: 80px; flex-shrink: 0;"></div>`;
             }
 
             function renderWallets() {
@@ -1237,7 +1221,7 @@
                     ${isAdminMode ? renderAdminBar('Редактирование кошельков', function() { addWalletItem(); }, 'Кошелёк') : ''}
                     <div class="section-header">🔐 Крипто Кошельки</div>
                     ${itemsHTML}
-                    <div style="min-height: 100px; width: 100%; flex-shrink: 0;"></div>`;
+                    <div style="min-height: 80px; flex-shrink: 0;"></div>`;
             }
 
             function renderPortfolio() {
@@ -1255,7 +1239,7 @@
                             <button class="btn btn-wave btn-full" style="margin-top:10px;">📊 Подробная статистика</button>
                         `}
                     </div>
-                    <div style="min-height: 100px; width: 100%; flex-shrink: 0;"></div>`;
+                    <div style="min-height: 80px; flex-shrink: 0;"></div>`;
             }
 
             function editVideoPreview() {
@@ -1458,49 +1442,17 @@
                 portfolio: renderPortfolio
             };
 
-            let isNavigating = false;
-
             function navigate(section) {
-                if (isNavigating) return;
-                isNavigating = true;
                 state.section = section;
-                
-                try {
-                    const content = renderers[section]?.() || '';
-                    if (mainContent) {
-                        // Спершу очищаємо контент
-                        mainContent.innerHTML = '';
-                        
-                        // Використовуємо requestAnimationFrame для гарантованого скидання
-                        requestAnimationFrame(() => {
-                            mainContent.innerHTML = content;
-                            
-                            // Примусове скидання скролу на початок
-                            requestAnimationFrame(() => {
-                                mainContent.scrollTop = 0;
-                                // Додатковий спосіб для iOS Safari
-                                if (mainContent.scrollTo) {
-                                    mainContent.scrollTo(0, 0);
-                                }
-                            });
-                        });
-                    }
-                } catch(e) {
-                    if (mainContent && section !== 'home') {
-                        try { 
-                            mainContent.innerHTML = renderers.home(); 
-                            requestAnimationFrame(() => {
-                                mainContent.scrollTop = 0;
-                            });
-                        } catch(e2) {}
-                    }
+                const content = renderers[section]?.() || '';
+                if (mainContent) {
+                    mainContent.innerHTML = content;
+                    mainContent.scrollTop = 0;
+                    if (mainContent.scrollTo) mainContent.scrollTo(0, 0);
                 }
-                
                 if (tg?.HapticFeedback) {
                     try { tg.HapticFeedback.impactOccurred('light'); } catch(e) {}
                 }
-                
-                setTimeout(() => { isNavigating = false; }, 100);
             }
 
             if (mainContent) {
@@ -1511,7 +1463,6 @@
                         navigate(navCard.dataset.nav);
                         return;
                     }
-                    
                     const backBtn = e.target.closest('.btn-back');
                     if (backBtn) {
                         e.preventDefault();

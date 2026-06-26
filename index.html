@@ -39,19 +39,12 @@
             padding: 8px;
             margin: 0;
             -webkit-font-smoothing: antialiased;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
         }
 
         .app-container {
             max-width: 430px;
             width: 100%;
-            height: 100%;
-            max-height: 820px;
+            height: 820px;
             background:
                 linear-gradient(135deg, rgba(10, 14, 20, 0.75), rgba(6, 8, 12, 0.82)),
                 url('bg.jpg') center/cover no-repeat;
@@ -109,15 +102,12 @@
             justify-content: space-between;
             position: relative;
             z-index: 2;
-            flex-shrink: 0;
         }
 
         .header-left {
             display: flex;
             align-items: center;
             gap: 10px;
-            flex: 1;
-            min-width: 0;
         }
 
         .logo-icon {
@@ -131,7 +121,6 @@
             font-size: 20px;
             box-shadow: 0 8px 20px rgba(201, 160, 80, 0.35);
             animation: logoFloat 3s ease-in-out infinite;
-            flex-shrink: 0;
         }
 
         @keyframes logoFloat {
@@ -141,15 +130,12 @@
 
         .brand-text {
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             letter-spacing: -0.3px;
             background: linear-gradient(to right, #e8ecf2, #bcc8d8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .admin-gear-btn {
@@ -167,7 +153,6 @@
             transition: all 0.3s ease;
             position: relative;
             z-index: 3;
-            flex-shrink: 0;
         }
 
         .admin-gear-btn:hover {
@@ -201,7 +186,6 @@
             z-index: 2;
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
-            -webkit-overflow-scrolling: touch;
         }
 
         .main-content::-webkit-scrollbar { width: 3px; }
@@ -524,22 +508,9 @@
             box-shadow: 0 0 50px rgba(255,0,0,0.9);
         }
 
-        .video-preview-info { 
-            padding: 14px; 
-            background: rgba(18, 22, 30, 0.6);
-            position: relative;
-            z-index: 2;
-        }
-        .video-preview-title { 
-            color: #ffffff; 
-            font-weight: 600; 
-            font-size: 0.9rem; 
-            margin-bottom: 4px; 
-        }
-        .video-preview-channel { 
-            color: #bbbbbb; 
-            font-size: 0.75rem; 
-        }
+        .video-preview-info { padding: 14px; }
+        .video-preview-title { color: var(--text-primary); font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+        .video-preview-channel { color: var(--text-secondary); font-size: 0.75rem; }
 
         .section-header {
             display: flex;
@@ -673,7 +644,7 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: var(--radius-lg);
-            padding: 14px 14px 16px 14px;
+            padding: 14px;
             border: 1px solid rgba(255,255,255,0.05);
             margin-bottom: 10px;
             animation: fadeInUp 0.6s ease both;
@@ -681,6 +652,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
+            overflow: hidden;
         }
 
         .news-item::before {
@@ -689,8 +661,6 @@
             top: 0; left: 0; right: 0;
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 50%, transparent);
-            z-index: 1;
-            pointer-events: none;
         }
 
         .news-item:hover { border-color: rgba(201,160,80,0.4); box-shadow: 0 0 20px rgba(201,160,80,0.2); }
@@ -729,18 +699,14 @@
         }
 
         .btn-neon {
-            padding: 10px 18px;
+            padding: 8px 16px;
             border-radius: 50px;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             background: rgba(201,160,80,0.1);
             color: #d4a840;
             border: 1px solid rgba(201,160,80,0.35);
             box-shadow: 0 0 10px rgba(201,160,80,0.15);
             flex-shrink: 0;
-            margin-top: 10px;
-            display: inline-flex;
-            width: auto;
-            min-height: 36px;
         }
 
         .btn-neon:active { 
@@ -768,7 +734,7 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.4);
         }
 
-        .btn-sm { padding: 10px 18px; font-size: 0.72rem; border-radius: 40px; min-height: 36px; }
+        .btn-sm { padding: 8px 16px; font-size: 0.7rem; border-radius: 40px; }
         .btn-full { width: 100%; justify-content: center; }
 
         .btn .ripple {
@@ -827,7 +793,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 38px;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
 
         .loading-screen.hidden { 
@@ -898,19 +864,8 @@
                 }
             }
 
-            setTimeout(hideLoadingScreen, 100);
-
-            document.addEventListener('visibilitychange', function() {
-                if (document.visibilityState === 'visible') {
-                    hideLoadingScreen();
-                    if (tg) {
-                        try {
-                            tg.ready();
-                            tg.expand();
-                        } catch(e) {}
-                    }
-                }
-            });
+            setTimeout(hideLoadingScreen, 300);
+            setTimeout(hideLoadingScreen, 1500);
 
             document.addEventListener('click', function(e) {
                 const btn = e.target.closest('.btn');
@@ -1182,7 +1137,7 @@
                             <div class="video-preview-channel">${state.videoData.channel}</div>
                         </div>
                         ${isAdminMode ? `
-                            <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 3;">
+                            <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;">
                                 <button class="edit-icon-btn edit" onclick="event.stopPropagation(); editVideoPreview();" title="Редактировать">✏️</button>
                             </div>
                         ` : ''}
@@ -1201,11 +1156,11 @@
                 state.educationItems.forEach((item, index) => {
                     itemsHTML += `
                         <div class="news-item stagger-${index + 1}" onclick="window.open('${item.url}', '_blank');">
-                            <div style="color:var(--text-primary); font-weight:600; font-size:0.9rem; margin-bottom:4px; padding-right: ${isAdminMode ? '60px' : '0'};">${item.title}</div>
-                            <div style="color:var(--text-secondary); font-size:0.75rem; margin-bottom:2px;">${item.description}</div>
-                            <button class="btn btn-neon btn-sm" onclick="event.stopPropagation(); window.open('${item.url}', '_blank');">Открыть</button>
+                            <div style="color:var(--text-primary); font-weight:600; padding-right: ${isAdminMode ? '60px' : '0'};">${item.title}</div>
+                            <div style="color:var(--text-secondary); font-size:0.75rem;">${item.description}</div>
+                            <button class="btn btn-neon btn-sm" style="margin-top:8px;" onclick="event.stopPropagation(); window.open('${item.url}', '_blank');">Открыть</button>
                             ${isAdminMode ? `
-                                <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 2;">
+                                <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;">
                                     <button class="edit-icon-btn edit" onclick="event.stopPropagation(); editEducationItem(${index});" title="Редактировать">✏️</button>
                                     <button class="edit-icon-btn delete" onclick="event.stopPropagation(); deleteEducationItem(${index});" title="Удалить">🗑️</button>
                                 </div>
@@ -1232,7 +1187,7 @@
                             </div>
                             <button class="btn btn-neon" onclick="event.stopPropagation();window.open('${item.url}','_blank');">Открыть</button>
                             ${isAdminMode ? `
-                                <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px; z-index: 2;">
+                                <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px;">
                                     <button class="edit-icon-btn edit" onclick="event.stopPropagation(); editExchangeItem(${index});" title="Редактировать">✏️</button>
                                     <button class="edit-icon-btn delete" onclick="event.stopPropagation(); deleteExchangeItem(${index});" title="Удалить">🗑️</button>
                                 </div>
@@ -1259,7 +1214,7 @@
                             </div>
                             <button class="btn btn-neon" onclick="event.stopPropagation();window.open('${item.url}','_blank');">Открыть</button>
                             ${isAdminMode ? `
-                                <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px; z-index: 2;">
+                                <div style="position: absolute; top: 6px; right: 6px; display: flex; gap: 3px;">
                                     <button class="edit-icon-btn edit" onclick="event.stopPropagation(); editWalletItem(${index});" title="Редактировать">✏️</button>
                                     <button class="edit-icon-btn delete" onclick="event.stopPropagation(); deleteWalletItem(${index});" title="Удалить">🗑️</button>
                                 </div>
@@ -1508,22 +1463,17 @@
             function navigate(section) {
                 if (isNavigating) return;
                 isNavigating = true;
-                
                 state.section = section;
                 
                 try {
                     const content = renderers[section]?.() || '';
                     if (mainContent) {
                         mainContent.innerHTML = content;
-                        // Завжди скидаємо прокрутку на початок при переході в розділ
                         mainContent.scrollTop = 0;
                     }
                 } catch(e) {
                     if (mainContent && section !== 'home') {
-                        try { 
-                            mainContent.innerHTML = renderers.home();
-                            mainContent.scrollTop = 0;
-                        } catch(e2) {}
+                        try { mainContent.innerHTML = renderers.home(); } catch(e2) {}
                     }
                 }
                 

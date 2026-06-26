@@ -39,6 +39,7 @@
             padding: 8px;
             margin: 0;
             -webkit-font-smoothing: antialiased;
+            overscroll-behavior: none; /* Блокує зсув всього mini app */
         }
 
         .app-container {
@@ -187,14 +188,6 @@
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
         }
-
-        /* ТІЛЬКИ для розділів — фіксуємо mini app при прокрутці */
-        .main-content.section-scroll {
-            overscroll-behavior: contain;
-        }
-
-        /* ДЛЯ МЕНЮ — залишаємо як було (без overscroll-behavior: contain) */
-        /* .main-content без класу .section-scroll поводиться як оригінал */
 
         .main-content::-webkit-scrollbar { width: 3px; }
         .main-content::-webkit-scrollbar-track { background: transparent; }
@@ -1181,7 +1174,8 @@
                     <button class="btn-back" onclick="navigate('home');">← Назад</button>
                     ${isAdminMode ? renderAdminBar('Редактирование обучения', function() { addEducationItem(); }, 'Курс') : ''}
                     <div class="section-header">📚 Крипто образование</div>
-                    ${itemsHTML}`;
+                    ${itemsHTML}
+                    <div style="min-height: 40px;"></div>`;
             }
 
             function renderLinks() {
@@ -1208,7 +1202,8 @@
                     <button class="btn-back" onclick="navigate('home');">← Назад</button>
                     ${isAdminMode ? renderAdminBar('Редактирование бирж', function() { addExchangeItem(); }, 'Биржу') : ''}
                     <div class="section-header">🔥 Биржи</div>
-                    ${itemsHTML}`;
+                    ${itemsHTML}
+                    <div style="min-height: 40px;"></div>`;
             }
 
             function renderWallets() {
@@ -1235,7 +1230,8 @@
                     <button class="btn-back" onclick="navigate('home');">← Назад</button>
                     ${isAdminMode ? renderAdminBar('Редактирование кошельков', function() { addWalletItem(); }, 'Кошелёк') : ''}
                     <div class="section-header">🔐 Крипто Кошельки</div>
-                    ${itemsHTML}`;
+                    ${itemsHTML}
+                    <div style="min-height: 40px;"></div>`;
             }
 
             function renderPortfolio() {
@@ -1252,7 +1248,8 @@
                         ` : `
                             <button class="btn btn-wave btn-full" style="margin-top:10px;">📊 Подробная статистика</button>
                         `}
-                    </div>`;
+                    </div>
+                    <div style="min-height: 40px;"></div>`;
             }
 
             function renderProfile() {
@@ -1479,19 +1476,11 @@
                     if (mainContent) {
                         mainContent.innerHTML = content;
                         mainContent.scrollTop = 0;
-                        
-                        // Додаємо клас section-scroll ТІЛЬКИ для розділів (не для home)
-                        if (section === 'home') {
-                            mainContent.classList.remove('section-scroll');
-                        } else {
-                            mainContent.classList.add('section-scroll');
-                        }
                     }
                 } catch(e) {
                     if (mainContent && section !== 'home') {
                         try { 
                             mainContent.innerHTML = renderers.home(); 
-                            mainContent.classList.remove('section-scroll');
                         } catch(e2) {}
                     }
                 }

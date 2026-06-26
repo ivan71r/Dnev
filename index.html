@@ -197,6 +197,17 @@
         .main-content::-webkit-scrollbar-track { background: transparent; }
         .main-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
 
+        .sync-bar {
+            text-align: center;
+            font-size: 0.6rem;
+            padding: 3px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            min-height: 18px;
+        }
+        .sync-bar.ok { color: #2ecc71; }
+        .sync-bar.err { color: #e63946; }
+
         .admin-bar {
             display: flex;
             align-items: center;
@@ -824,6 +835,8 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -843,11 +856,46 @@
             <button class="admin-gear-btn" id="adminGearBtn" title="Редактирование">⚙️</button>
         </div>
         <div class="main-content" id="mainContent"></div>
+        <div class="sync-bar" id="syncBar">Загрузка...</div>
     </div>
 
     <script>
         (function() {
+            // ========== FIREBASE КОНФІГУРАЦІЯ ==========
+            // ЗАМІНІТЬ НА ВАШІ РЕАЛЬНІ ДАНІ З FIREBASE CONSOLE
+            const firebaseConfig = {
+                apiKey: "ВАШ_API_KEY",
+                authDomain: "dnev-d520c.firebaseapp.com",
+                databaseURL: "https://dnev-d520c-default-rtdb.europe-west1.firebasedatabase.app",
+                projectId: "dnev-d520c",
+                storageBucket: "dnev-d520c.appspot.com",
+                messagingSenderId: "ВАШ_SENDER_ID",
+                appId: "ВАШ_APP_ID"
+            };
+
+            const SECRET_KEY = 'DnevnikSecret2024';
+            const ADMIN_PASSWORD = 'DnevnikAktiv';
+
+            let db = null;
+            let fbReady = false;
+
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                fbReady = true;
+            } catch(e) {
+                console.warn('Firebase init error:', e);
+            }
+
             const tg = window.Telegram?.WebApp;
+            const syncBar = document.getElementById('syncBar');
+
+            function setSync(msg, cls) {
+                if (syncBar) {
+                    syncBar.textContent = msg;
+                    syncBar.className = 'sync-bar ' + (cls || '');
+                }
+            }
             
             function initTelegram() {
                 if (!tg) return;
@@ -862,6 +910,7 @@
             initTelegram();
 
             let isAdminMode = false;
+            let isAdminVerified = false;
             let currentEditModal = null;
 
             const loadingScreen = document.getElementById('loadingScreen');
@@ -895,6 +944,7 @@
                 });
             });
 
+            // ========== АДМІН-КНОПКА ==========
             adminGearBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -903,12 +953,28 @@
                 
                 setTimeout(() => {
                     adminGearBtn.classList.remove('spinning');
-                    isAdminMode = !isAdminMode;
                     
-                    if (isAdminMode) {
+                    if (!isAdminMode) {
+                        const saved = localStorage.getItem('dnevnik_admin_ok');
+                        if (saved === '1') {
+                            isAdminVerified = true;
+                        } else {
+                            const pwd = prompt('🔐 Пароль администратора:');
+                            if (pwd === ADMIN_PASSWORD) {
+                                isAdminVerified = true;
+                                localStorage.setItem('dnevnik_admin_ok', '1');
+                            } else if (pwd !== null) {
+                                alert('❌ Неверный пароль');
+                                return;
+                            } else {
+                                return;
+                            }
+                        }
+                        isAdminMode = true;
                         adminGearBtn.classList.add('active');
                         adminGearBtn.title = 'Выключить редактирование';
                     } else {
+                        isAdminMode = false;
                         adminGearBtn.classList.remove('active');
                         adminGearBtn.title = 'Редактирование';
                     }
@@ -1074,6 +1140,74 @@
                     performance: '+24.8% за всё время'
                 }
             };
+
+            // ========== FIREBASE ФУНКЦІЇ ==========
+            async function loadFromFB() {
+                if (!fbReady || !db) {
+                    setSync('Офлайн-режим', 'err');
+                    navigate('home');
+                    hideLoadingScreen();
+                    return;
+                }
+                setSync('Загрузка данных...', '');
+                try {
+                    const snap = await db.ref('appData').once('value');
+                    const data = snap.val();
+                    if (data) {
+                        if (data.videoData) state.videoData = data.videoData;
+                        if (data.navItems) state.navItems = data.navItems;
+                        if (data.educationItems) state.educationItems = data.educationItems;
+                        if (data.exchangeItems) state.exchangeItems = data.exchangeItems;
+                        if (data.walletItems) state.walletItems = data.walletItems;
+                        if (data.portfolio) state.portfolio = data.portfolio;
+                        setSync('Данные синхронизированы', 'ok');
+                    } else {
+                        await saveToFB();
+                        setSync('Данные загружены', 'ok');
+                    }
+                } catch(e) {
+                    setSync('Ошибка загрузки', 'err');
+                }
+                navigate('home');
+                hideLoadingScreen();
+                listenFB();
+            }
+
+            async function saveToFB() {
+                if (!fbReady || !db) return;
+                const d = {
+                    videoData: state.videoData,
+                    navItems: state.navItems,
+                    educationItems: state.educationItems,
+                    exchangeItems: state.exchangeItems,
+                    walletItems: state.walletItems,
+                    portfolio: state.portfolio,
+                    secretKey: SECRET_KEY
+                };
+                try {
+                    await db.ref('appData').set(d);
+                    setSync('Сохранено', 'ok');
+                    setTimeout(() => setSync('Данные синхронизированы', 'ok'), 2000);
+                } catch(e) {
+                    setSync('Ошибка сохранения', 'err');
+                }
+            }
+
+            function listenFB() {
+                if (!fbReady || !db) return;
+                db.ref('appData').on('value', (snap) => {
+                    const data = snap.val();
+                    if (!data || isAdminMode) return;
+                    let changed = false;
+                    if (JSON.stringify(data.videoData) !== JSON.stringify(state.videoData)) { state.videoData = data.videoData; changed = true; }
+                    if (JSON.stringify(data.navItems) !== JSON.stringify(state.navItems)) { state.navItems = data.navItems; changed = true; }
+                    if (JSON.stringify(data.educationItems) !== JSON.stringify(state.educationItems)) { state.educationItems = data.educationItems; changed = true; }
+                    if (JSON.stringify(data.exchangeItems) !== JSON.stringify(state.exchangeItems)) { state.exchangeItems = data.exchangeItems; changed = true; }
+                    if (JSON.stringify(data.walletItems) !== JSON.stringify(state.walletItems)) { state.walletItems = data.walletItems; changed = true; }
+                    if (JSON.stringify(data.portfolio) !== JSON.stringify(state.portfolio)) { state.portfolio = data.portfolio; changed = true; }
+                    if (changed) navigate(state.section);
+                });
+            }
 
             function renderAdminBar(title, onAdd, addLabel) {
                 return `
@@ -1251,6 +1385,7 @@
                     state.videoData.title = values.title;
                     state.videoData.channel = values.channel;
                     state.videoData.url = values.url;
+                    saveToFB();
                     navigate('home');
                 });
             }
@@ -1269,6 +1404,7 @@
                         url: values.url || null,
                         nav: values.url ? null : (values.nav || null)
                     });
+                    saveToFB();
                     navigate('home');
                 });
             }
@@ -1287,6 +1423,7 @@
                         url: values.url || null,
                         nav: values.url ? null : (values.nav || null)
                     };
+                    saveToFB();
                     navigate('home');
                 });
             }
@@ -1294,6 +1431,7 @@
             function deleteNavItem(index) {
                 if (confirm('Удалить эту кнопку?')) {
                     state.navItems.splice(index, 1);
+                    saveToFB();
                     navigate('home');
                 }
             }
@@ -1310,6 +1448,7 @@
                         description: values.description,
                         url: values.url
                     });
+                    saveToFB();
                     navigate('education');
                 });
             }
@@ -1326,6 +1465,7 @@
                         description: values.description,
                         url: values.url
                     };
+                    saveToFB();
                     navigate('education');
                 });
             }
@@ -1333,6 +1473,7 @@
             function deleteEducationItem(index) {
                 if (confirm('Удалить этот курс?')) {
                     state.educationItems.splice(index, 1);
+                    saveToFB();
                     navigate('education');
                 }
             }
@@ -1351,6 +1492,7 @@
                         url: values.url,
                         image: values.image || 'default.png'
                     });
+                    saveToFB();
                     navigate('links');
                 });
             }
@@ -1369,6 +1511,7 @@
                         url: values.url,
                         image: values.image || item.image
                     };
+                    saveToFB();
                     navigate('links');
                 });
             }
@@ -1376,6 +1519,7 @@
             function deleteExchangeItem(index) {
                 if (confirm('Удалить эту биржу?')) {
                     state.exchangeItems.splice(index, 1);
+                    saveToFB();
                     navigate('links');
                 }
             }
@@ -1394,6 +1538,7 @@
                         url: values.url,
                         image: values.image || 'default.png'
                     });
+                    saveToFB();
                     navigate('wallets');
                 });
             }
@@ -1412,6 +1557,7 @@
                         url: values.url,
                         image: values.image || item.image
                     };
+                    saveToFB();
                     navigate('wallets');
                 });
             }
@@ -1419,6 +1565,7 @@
             function deleteWalletItem(index) {
                 if (confirm('Удалить этот кошелёк?')) {
                     state.walletItems.splice(index, 1);
+                    saveToFB();
                     navigate('wallets');
                 }
             }
@@ -1430,6 +1577,7 @@
                 ], (values) => {
                     state.portfolio.composition = values.composition;
                     state.portfolio.performance = values.performance;
+                    saveToFB();
                     navigate('portfolio');
                 });
             }
@@ -1487,7 +1635,7 @@
             window.editPortfolio = editPortfolio;
             window.navigate = navigate;
 
-            navigate('home');
+            loadFromFB();
         })();
     </script>
 </body>
